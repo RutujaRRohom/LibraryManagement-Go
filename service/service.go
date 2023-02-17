@@ -5,10 +5,10 @@ import(
    "library_management/domain"
    "library_management/db"
     "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
+	//"golang.org/x/crypto/bcrypt"
 	"errors"
-	//"crypto/sha256"
-	//"encoding/base64"
+	"crypto/sha256"
+	"encoding/base64"
 	"time"
 	"github.com/dgrijalva/jwt-go"
 
@@ -18,6 +18,7 @@ import(
 type Services interface{
 	RegisterUser(ctx context.Context,users domain.Users) (userAdded domain.UserResponse,err error)
     Login(ctx context.Context,userAuth domain.LoginRequest)(token string,err error)
+	AddBooks(context.Context,domain.AddBook) (domain.AddBook,error)
 }
 
 type bookService struct{
@@ -45,9 +46,13 @@ func GenerateToken(u_id int) (token string,err error){
 	}
 
 
-func HashPassword(password string) (string,error){
-	hashedPassword,err:=bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(hashedPassword),err
+func HashPassword(password string) (string){
+
+	hsha := sha256.New()
+	hsha.Write([]byte(password))
+	hash := base64.URLEncoding.EncodeToString(hsha.Sum(nil))
+	logrus.Info(password, " -> ", hash)
+	return hash
 }
 
 func (b *bookService)RegisterUser(ctx context.Context,user domain.Users) (registerResponse domain.UserResponse,err error){
@@ -60,7 +65,7 @@ func (b *bookService)RegisterUser(ctx context.Context,user domain.Users) (regist
 		Role  :user.Role,
 
 	}
-	registerResponse.Password,err=HashPassword(registerResponse.Password)
+	registerResponse.Password=HashPassword(registerResponse.Password)
 	err = b.store.CreateUser(ctx,registerResponse)
 	if err !=nil{
 		logrus.WithField("err", err.Error()).Error("error registering user")
@@ -73,11 +78,11 @@ func (b *bookService)RegisterUser(ctx context.Context,user domain.Users) (regist
 func(b *bookService) Login(ctx context.Context,userAuth domain.LoginRequest) (token string,err error){
 
     // var u_id int
-	userAuth.Password,err=HashPassword(userAuth.Password)
-	if err!=nil{
-		errors.New("encryption failed")
-		return
-	}
+	userAuth.Password=HashPassword(userAuth.Password)
+	// if err!=nil{
+	// 	errors.New("encryption failed")
+	// 	return
+	// }
 	var u_id int
 	u_id,err = b.store.LoginUser(ctx,userAuth.Email,userAuth.Password)
 	if err!=nil{
@@ -85,18 +90,29 @@ func(b *bookService) Login(ctx context.Context,userAuth domain.LoginRequest) (to
 		return
 	}
 	
-
+  
 	token,err =GenerateToken(u_id)
 	if err!=nil{
-		logrus.WithField("err", err.Error()).Error("error generating fwt token for user")
+		logrus.WithField("err", err.Error()).Error("error generating jwt token for user")
 		return
 
 	}
 	return token,nil
 	
+}
+
+
+
+func(b *bookService) AddBooks(ctx context.Context,add domain.AddBook) (added domain.AddBook,err error){
+
 	
-
-
+	err=b.store.AddingBook(ctx,add)
+	if err !=nil{
+		logrus.WithField("err", err.Error()).Error("error adding book")
+		return
+	}
+	added=add
+	return added,nil
 }
 
 

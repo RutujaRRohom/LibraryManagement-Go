@@ -1,3 +1,3 @@
 -- DROP TABLE users;
--- -- DROP TABLE  users;
--- DROP TABLE books;
+ DROP TABLE  users;
+--  DROP TABLE books;

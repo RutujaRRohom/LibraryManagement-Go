@@ -33,3 +33,13 @@ type LoginResponse struct{
 	Message string `json:"msg"`
 	Token string `json:"token"`
 }
+
+
+type AddBook struct{
+BookId int `db":book_id" json:"bookId"`
+BookName string `db:"book_name" json:"book_name`
+BookAuthor string `db:"book_author" json:"bookAuthor"`
+Publisher string  `db:"publisher" json:"publisher"`
+Quantity int `'db:"quantity" json:"quantity`
+}
+
