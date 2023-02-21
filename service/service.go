@@ -19,6 +19,9 @@ type Services interface{
 	RegisterUser(ctx context.Context,users domain.Users) (userAdded domain.UserResponse,err error)
     Login(ctx context.Context,userAuth domain.LoginRequest)(token string,err error)
 	AddBooks(context.Context,domain.AddBook) (domain.AddBook,error)
+	GetBooks(ctx context.Context)([]domain.GetAllBooksResponse,error)
+	IssueBook(ctx context.Context,issueReq domain.IssueBookRequest)(booked domain.IssuedBookResponse,err error)
+
 }
 
 type bookService struct{
@@ -35,10 +38,10 @@ func NewBookService(s db.Storer) Services{
 
 var secretKey=[]byte("81mohomrajutr")
 
-func GenerateToken(u_id int) (token string,err error){
+func GenerateToken(role string) (token string,err error){
 		tokenExpirationTime := time.Now().Add(time.Hour * 24)
 		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"user_id": u_id,
+			"Role":    role,
 			"exp":     tokenExpirationTime.Unix(),
 		})
 		token, err = tokenObject.SignedString(secretKey)
@@ -83,15 +86,15 @@ func(b *bookService) Login(ctx context.Context,userAuth domain.LoginRequest) (to
 	// 	errors.New("encryption failed")
 	// 	return
 	// }
-	var u_id int
-	u_id,err = b.store.LoginUser(ctx,userAuth.Email,userAuth.Password)
+	var role string
+	role,err = b.store.LoginUser(ctx,userAuth.Email,userAuth.Password)
 	if err!=nil{
 		errors.New("error")
 		return
 	}
 	
   
-	token,err =GenerateToken(u_id)
+	token,err =GenerateToken(role)
 	if err!=nil{
 		logrus.WithField("err", err.Error()).Error("error generating jwt token for user")
 		return
@@ -116,5 +119,23 @@ func(b *bookService) AddBooks(ctx context.Context,add domain.AddBook) (added dom
 }
 
 
+func (b *bookService) GetBooks(ctx context.Context)(books []domain.GetAllBooksResponse,err error){
+	books,err =b.store.GetAllBooksFromDb(ctx)
+	if err !=nil{
+		logrus.WithField("err", err.Error()).Error("error in fetching books")
+		return
+	} 
+	return
+}
+
+
+func (b *bookService) IssueBook(ctx context.Context,issueReq domain.IssueBookRequest)(booked domain.IssuedBookResponse,err error){
+	booked,err=b.store.IssuedBook(ctx,issueReq)
+	if err != nil{
+		logrus.WithField("err", err.Error()).Error("error in issuing books")
+		return
+	}
+	return
+}
 
 

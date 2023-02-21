@@ -37,9 +37,45 @@ type LoginResponse struct{
 
 type AddBook struct{
 BookId int `db":book_id" json:"bookId"`
-BookName string `db:"book_name" json:"book_name`
+BookName string `db:"book_name" json:"book_name"`
 BookAuthor string `db:"book_author" json:"bookAuthor"`
 Publisher string  `db:"publisher" json:"publisher"`
-Quantity int `'db:"quantity" json:"quantity`
+Quantity int `'db:"quantity" json:"quantity"`
+Status string `db:"status" json:"status"`
 }
 
+type GetAllBooksResponse struct{
+BookId int `json:"bookId"`
+BookName string `json:"book_name"`
+BookAuthor string `json:"bookAuthor"`
+Publisher string  `json:"publisher"`
+Quantity int ` json:"quantity"`
+Status string `json:"status"`
+}
+
+type IssueBookRequest struct{
+	UserId int `json:"user_id"`
+	BookId int `json:"book_id"`
+}
+
+type IssuedBookResponse struct{
+	Transaction_id int `json:"transaction_id"`
+	UserId int `json:"user_id`
+	BookId int `json:"book_id"`
+	BookName string `json:"book_name"`
+    BookAuthor string `json:"bookAuthor"`
+    Publisher string  `json:"publisher"`
+	Quantity int  `json:"quantity"`
+	Status string `json:"status"`
+
+}
+
+// {
+//     "id": "123456",
+//     "title": "The Catcher in the Rye",
+//     "author": "J.D. Salinger",
+//     "status": "issued",
+//     "quantity": 4,
+//     "issued_to": "987654",
+//     "issued_date": "2023-02-18T10:00:00Z"
+// }

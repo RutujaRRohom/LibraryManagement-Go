@@ -1,4 +1,4 @@
-APP_NAME: "Library"
+APP_NAME: "library_v2"
 APP_PORT: "33001"
 
 # MongoDB URI
@@ -6,4 +6,24 @@ APP_PORT: "33001"
 #DB_NAME: "dbname"
 
 # Postgres
-DB_URI: "postgresql://rohomrutuja:1234@localhost:5432/Library?sslmode=disable"
+DB_URI: "postgresql://rohomrutuja:1234@localhost:5432/library_v2?sslmode=disable"
+
+
+CREATE TABLE users(
+   user_id varchar(64) GENERATED ALWAYS AS IDENTITY,
+   email varchar(320) NOT NULL ,
+  password varchar(64) NOT NULL,
+  user_name varchar(255) NOT NULL ,
+  role varchar(128) NOT ,
+  PRIMARY KEY (user_id)
+);
+
+
+CREATE TABLE book_activity(
+   id INT GENERATED ALWAYS AS IDENTITY,
+   user_id INT,
+   PRIMARY KEY(id),
+   CONSTRAINT fk_book_activity
+      FOREIGN KEY(user_id) 
+	  REFERENCES users(user_id)
+);

@@ -122,3 +122,45 @@ func addBooksHandler(deps Dependencies) http.HandlerFunc{
 
 
 }
+
+func getAllBooksHandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request){
+		
+		books,err:=deps.bookService.GetBooks(req.Context())
+		if err!= nil{
+			http.Error(w,"error returning books",http.StatusBadRequest)
+			return
+		}
+		json_response,err:=json.Marshal(books)
+		if err!=nil{
+			http.Error(w,"error in marshelling",http.StatusBadRequest)
+			return
+
+		}
+		w.Write(json_response)
+	})
+}
+
+
+func issueBookHandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request){
+        var issueReq domain.IssueBookRequest
+		err:=json.NewDecoder(req.Body).Decode(&issueReq)
+		if err!=nil{
+			http.Error(w,"invalid request body",http.StatusBadRequest)
+		}
+
+		booked,err:=deps.bookService.IssueBook(req.Context(),issueReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+         	return
+		}
+		bookJSON, err := json.Marshal(booked)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bookJSON)
+	})
+}

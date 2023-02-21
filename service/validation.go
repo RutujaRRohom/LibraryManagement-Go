@@ -66,7 +66,7 @@ func ValidateJWT(tokenString string) ( err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, err
 		}
-		return secretKey, nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return
@@ -75,8 +75,8 @@ func ValidateJWT(tokenString string) ( err error) {
 	if !ok {
 		return
 	}
-	u_id := int(claims["user_id"].(float64))
-	if !ok || u_id != 18 {
+	role := string(claims["Role"].(string))
+	if !ok || role != "Admin" {
 		logger.WithField("err",err.Error()).Error("error registering user")
 		return
 	}
