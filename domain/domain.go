@@ -2,11 +2,11 @@ package domain
 
 import
 (
-
+// "time"
 )
 
 type Users struct{
-	User_id int  `db:"user_id" json:"user_id"`
+	User_id string  `db:"user_id" json:"user_id"`
 	Email string  `db:"email" json:"email"`
 	Password string `db:"Password" json:"Password"`
 	Name string     `db:"Name" json:"Name"`	
@@ -15,7 +15,7 @@ type Users struct{
 
 
 type UserResponse struct{
-	User_id int  `db:"user_id" json:"user_id"`
+	User_id string  `db:"user_id" json:"user_id"`
 	Email string  `db:"email" json:"email"`
 	Password string `db:"Password" json:"Password"`
 	Name string     `db:"Name" json:"Name"`	
@@ -36,7 +36,7 @@ type LoginResponse struct{
 
 
 type AddBook struct{
-BookId int `db":book_id" json:"bookId"`
+BookId string `db":book_id" json:"bookId"`
 BookName string `db:"book_name" json:"book_name"`
 BookAuthor string `db:"book_author" json:"bookAuthor"`
 Publisher string  `db:"publisher" json:"publisher"`
@@ -45,7 +45,16 @@ Status string `db:"status" json:"status"`
 }
 
 type GetAllBooksResponse struct{
-BookId int `json:"bookId"`
+BookId string `json:"bookId"`
+BookName string `json:"book_name"`
+BookAuthor string `json:"bookAuthor"`
+Publisher string  `json:"publisher"`
+Quantity int ` json:"quantity"`
+Status string `json:"status"`
+}
+
+type GetBookById struct{
+BookId string `json:"bookId"`
 BookName string `json:"book_name"`
 BookAuthor string `json:"bookAuthor"`
 Publisher string  `json:"publisher"`
@@ -54,28 +63,41 @@ Status string `json:"status"`
 }
 
 type IssueBookRequest struct{
-	UserId int `json:"user_id"`
-	BookId int `json:"book_id"`
+	UserId string `json:"user_id"`
+	BookId string `json:"bookId"`
 }
 
 type IssuedBookResponse struct{
-	Transaction_id int `json:"transaction_id"`
-	UserId int `json:"user_id`
-	BookId int `json:"book_id"`
+	//issue_id int `json:"issue_id"`
+	UserId string `json:"user_id`
+	BookId string `json:"bookId"`
 	BookName string `json:"book_name"`
     BookAuthor string `json:"bookAuthor"`
     Publisher string  `json:"publisher"`
 	Quantity int  `json:"quantity"`
 	Status string `json:"status"`
+	//Book_Issued_at time.Time ` json:"issue_date"`
 
 }
+type issuedBookJson struct{
+	message string `json:"message"`
+	issued IssuedBookResponse `json:"issued"`
+}
 
-// {
-//     "id": "123456",
-//     "title": "The Catcher in the Rye",
-//     "author": "J.D. Salinger",
-//     "status": "issued",
-//     "quantity": 4,
-//     "issued_to": "987654",
-//     "issued_date": "2023-02-18T10:00:00Z"
-// }
+type ResetPasswordRequest struct{
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword string `json:"newPassword"`
+}
+type ResetPasswordResponse struct{
+	Message string `json:"message"`
+	}
+
+
+type ResetNameRequest struct{
+	CurrentName string `json:"current_name"`
+	NewName string `json:"newName"`
+	}
+type ResetNameResponse struct{
+	Message string `json:"message"`
+		}
+	

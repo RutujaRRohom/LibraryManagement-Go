@@ -21,6 +21,8 @@ type Services interface{
 	AddBooks(context.Context,domain.AddBook) (domain.AddBook,error)
 	GetBooks(ctx context.Context)([]domain.GetAllBooksResponse,error)
 	IssueBook(ctx context.Context,issueReq domain.IssueBookRequest)(booked domain.IssuedBookResponse,err error)
+    ResetPassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error)
+	UpdateName(ctx context.Context,email string,name domain.ResetNameRequest)(err error)
 
 }
 
@@ -38,10 +40,11 @@ func NewBookService(s db.Storer) Services{
 
 var secretKey=[]byte("81mohomrajutr")
 
-func GenerateToken(role string) (token string,err error){
+func GenerateToken(role string,email string) (token string,err error){
 		tokenExpirationTime := time.Now().Add(time.Hour * 24)
 		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"Role":    role,
+			"email": email,
 			"exp":     tokenExpirationTime.Unix(),
 		})
 		token, err = tokenObject.SignedString(secretKey)
@@ -94,7 +97,7 @@ func(b *bookService) Login(ctx context.Context,userAuth domain.LoginRequest) (to
 	}
 	
   
-	token,err =GenerateToken(role)
+	token,err =GenerateToken(role,userAuth.Email)
 	if err!=nil{
 		logrus.WithField("err", err.Error()).Error("error generating jwt token for user")
 		return
@@ -133,6 +136,35 @@ func (b *bookService) IssueBook(ctx context.Context,issueReq domain.IssueBookReq
 	booked,err=b.store.IssuedBook(ctx,issueReq)
 	if err != nil{
 		logrus.WithField("err", err.Error()).Error("error in issuing books")
+		return
+	}
+	return
+}
+
+
+func (b *bookService) ResetPassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error){
+
+
+
+	pass.CurrentPassword=HashPassword(pass.CurrentPassword)
+	pass.NewPassword=HashPassword(pass.NewPassword)
+
+
+	err = b.store.UpdatePassword(ctx,email,pass)
+	if err !=nil{
+		logrus.WithField("err", err.Error()).Error("error in reseting password")
+		return
+	}
+	return
+}
+
+
+func (b *bookService)UpdateName(ctx context.Context,email string,name domain.ResetNameRequest)(err error){
+
+
+	err = b.store.Updatename(ctx,email,name)
+	if err !=nil{
+		logrus.WithField("err", err.Error()).Error("error in reseting password")
 		return
 	}
 	return

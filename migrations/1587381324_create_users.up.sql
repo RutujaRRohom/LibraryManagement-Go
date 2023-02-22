@@ -21,11 +21,11 @@ CREATE TABLE IF NOT EXISTS books (
 
 
 CREATE TABLE book_activity(
-   issue_id varchar(32) NOT NULL,
+   id varchar(36) NOT NULL,
 	issue_date timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
    user_id varchar(64),
 	book_id varchar(36),
-   PRIMARY KEY(issue_id),
+   PRIMARY KEY(id),
 	CONSTRAINT fk_book_activity1
       FOREIGN KEY(user_id) 
 	  REFERENCES users(user_id),

@@ -6,6 +6,7 @@ import
 "net/http"
 "encoding/json"
 //"strings"
+//"fmt"
 
 )
 
@@ -155,6 +156,13 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc{
 			http.Error(w, err.Error(), http.StatusInternalServerError)
          	return
 		}
+		// var response domain.issuedBookJson
+		// json_response:= response{
+		// 	message:"book issued successfully",
+		// 	issued: booked,
+
+		// }
+		//message:="book issued successfully"
 		bookJSON, err := json.Marshal(booked)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -162,5 +170,115 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc{
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bookJSON)
+	})
+}
+
+
+
+func ResetPasswordHandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request ){
+		var pass domain.ResetPasswordRequest
+		err:=json.NewDecoder(req.Body).Decode(&pass)
+		if err !=nil{
+			http.Error(w,"invalid request body",http.StatusBadRequest)
+		}
+	
+		
+		authHeader := req.Header.Get("Authorization")
+		 if authHeader == "" {
+		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+	 		return
+ 		}
+		email,err:=ValidateJWTEmail(authHeader)
+		if err != nil{
+			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+			return
+		}
+		if err=validateEmail(email); err!=nil{
+			http.Error(w,"invalid mail",http.StatusBadRequest)
+			return
+		 }
+
+		err=deps.bookService.ResetPassword(req.Context(),email,pass)
+		if err != nil{
+			http.Error(w, "invalid current password", http.StatusInternalServerError)
+			return
+		}
+		msg:=domain.ResetPasswordResponse{
+			Message:"password reset successfully",
+		}
+		json_response,err:=json.Marshal(msg)
+		if err!=nil{
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(json_response)
+	})
+}
+
+
+func UpdateNameHandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request ){
+		var name domain.ResetNameRequest
+		err:=json.NewDecoder(req.Body).Decode(&name)
+		if err !=nil{
+			http.Error(w,"invalid request body",http.StatusBadRequest)
+		}
+	
+		
+		authHeader := req.Header.Get("Authorization")
+		 if authHeader == "" {
+		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+	 		return
+ 		}
+		email,err:=ValidateJWTEmail(authHeader)
+		if err != nil{
+			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+			return
+		}
+		if err=validateEmail(email); err!=nil{
+			http.Error(w,"invalid mail",http.StatusBadRequest)
+			return
+		 }
+
+		err=deps.bookService.UpdateName(req.Context(),email,name)
+		if err != nil{
+			http.Error(w, "invalid current name", http.StatusInternalServerError)
+			return
+		}
+		msg:=domain.ResetPasswordResponse{
+			Message:"name reset successfully",
+		}
+		json_response,err:=json.Marshal(msg)
+		if err!=nil{
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(json_response)
+	})
+}
+
+
+func getUserByEmailNameHandler(deps Dependencies)(http.HandlerFunc){
+	return http.HandlerFunc(func (w http.ResponseWriter,req *http.Request){
+
+        vars:=mux.Vars(req)
+		
+		user,err=getUsersByEmail(req.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+         	return
+		}
+		userJSON,err=json.Marshal(user)
+		if err!=nil{
+			http.Error(w,"error in marshelling",http.StatusBadRequest)
+			return
+
+		}
+		w.Write(json_response)
+
+
 	})
 }
