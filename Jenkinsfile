@@ -117,7 +117,7 @@ pipeline{
 
 
 
-            mail bcc: '', body: " Hi Team \n I have forwarded the build status of $JOB_NAME  \n Build : $BUILD_NUMBER  ${currentBuild.currentResult}.\n \n \n Check the console output at ${env.BUILD_URL} to view results\n Thanks and Regards ", cc: 'shubham.pradhan179@gmail.com', from: '', replyTo: '', subject: 'Test Email From Jenkins Job', to: 'dubeyakshat88@gmail.com'
+            mail bcc: '', body: " Hi Team \n I have forwarded the build status of $JOB_NAME  \n Build : $BUILD_NUMBER  ${currentBuild.currentResult}.\n \n \n Check the console output at ${env.BUILD_URL} to view results\n Thanks and Regards ", cc: 'rohit.sinha@joshsoftware.com', from: '', replyTo: '', subject: 'Test Email From Jenkins Job', to: 'dubeyakshat88@gmail.com'
 
 
 
