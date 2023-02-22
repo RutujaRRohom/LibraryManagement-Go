@@ -93,12 +93,11 @@ pipeline{
 
             steps{
 
-                sh "docker pull 806531795069.dkr.ecr.us-east-1.amazonaws.com/farmeasy-private:latest"
+                sh "docker pull 089705641992.dkr.ecr.ap-southeast-1.amazonaws.com/library-management-ecr:latest"
 
                 sh "docker stop deploy || true"
 
-                sh 'docker run --rm -p 3000:3000 --name deploy -v /home/ubuntu/project:/secrets -d 806531795069.dkr.ecr.us-east-1.amazonaws.com/farmeasy-private:latest'
-
+                sh 'docker run --rm -p 3000:3000 --name deploy -v /home/ubuntu/project:/secrets -d 089705641992.dkr.ecr.ap-southeast-1.amazonaws.com/library-management-ecr:latest'
                 sh 'docker ps'
 
             }
