@@ -26,6 +26,7 @@ type Services interface{
 	getUsersByEmailName(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
 	GetBooksActivity(ctx context.Context)(book []domain.GetBooksActivityResponse,err error)
 	Getbooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
+	ReturnBook(ctx context.Context,book domain.ReturnBookRequest)(err error)
 
 
 }
@@ -196,6 +197,15 @@ func (b *bookService)GetBooksActivity(ctx context.Context)(book []domain.GetBook
 func (b *bookService)Getbooks(ctx context.Context,user domain.GetbooksRequest)(book []domain.GetBooksResponse,err error){
 	book,err = b.store.GetUserBooks(ctx,user)
 	if err != nil {
+		logrus.WithField("err", err.Error()).Error("error in getting books issued")
+		return
+	}
+	return
+}
+
+func (b *bookService)ReturnBook(ctx context.Context,book domain.ReturnBookRequest)(err error){
+	err=b.store.ReturnBooks(ctx,book)
+	if err != nil{
 		logrus.WithField("err", err.Error()).Error("error in getting books issued")
 		return
 	}

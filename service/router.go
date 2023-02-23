@@ -31,5 +31,6 @@ func InitRouter(deps Dependencies) (router *mux.Router) {
 	router.HandleFunc("/getUsersByEmailName",getUserByEmailNameHandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/getBooksActivity",getBooksActivityHandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/users/getbooksActivity",getBookshandler(deps)).Methods(http.MethodGet)
+	router.HandleFunc("/users/returnBooks",ReturnBookHandler(deps)).Methods(http.MethodPost)
 	return
 }

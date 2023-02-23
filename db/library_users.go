@@ -5,7 +5,7 @@ import
 	logger "github.com/sirupsen/logrus"
 	"library_management/domain"
 	"fmt"
-	//"database/sql"
+	//"time"
 	"log"
 	"github.com/google/uuid"
 
@@ -26,6 +26,7 @@ type Storer interface{
 	GetUsers(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
 	GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse,err error)
 	GetUserBooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
+	ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(err error)
 
 }
 
@@ -94,7 +95,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
     // getBookByIdQuery:=`SELECT * from books where book_id=$1`
 	//var Book domain.GetBookById
 	Book,err := s.getBookById(ctx,booking.BookId)
-	fmt.Println("rutuja IssuedBook 98")
+	//fmt.Println("rutuja IssuedBook 98")
 	if err != nil{
 		logger.WithField("error occured",err.Error()).Error("error getting book id")
 		return
@@ -103,7 +104,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 		logger.WithField("err",err.Error()).Error("book is not available ")
 		return
 	}
-	fmt.Println("rutuja IssuedBook 107", Book)
+	//fmt.Println("rutuja IssuedBook 107", Book)
 	//TODO getUser()
 	err = s.addUserIssuedBook(ctx,booking.UserId,booking.BookId)
     if err != nil {
@@ -205,7 +206,7 @@ func (s *pgStore)UpdatePassword(ctx context.Context,email string,pass domain.Res
 	
 	//check if the user exists with this email address in database
 	 //resetPasswordQuery:= `select email from users where password=$1`
-	 
+
 	 err = s.db.QueryRow("select email from users where password= $1",pass.CurrentPassword ).Scan(&email)
 	 fmt.Println(pass.CurrentPassword)
      if err != nil {
@@ -299,6 +300,44 @@ func (s *pgStore)GetUserBooks(ctx context.Context,bk domain.GetbooksRequest)(boo
 	}
 	return book,nil
 
+}
+
+
+func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(err error){
+	var userExists, bookExists, bookIssued bool
+        err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", book.UserID).Scan(&userExists)
+        if err != nil {
+			logger.WithField("err",err.Error()).Error("user not exist")
+			return
+        }
+        err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM books WHERE book_id = $1)", book.BookID).Scan(&bookExists)
+        if err != nil {
+			logger.WithField("err",err.Error()).Error("book with this ID not exist")
+			return
+        }
+        err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM book_activity WHERE user_id = $1 AND book_id = $2)", book.UserID, book.BookID).Scan(&bookIssued)
+        if err != nil {
+			logger.WithField("err",err.Error()).Error("this book activity doesnt exists")
+			return
+        }
+		// err = db.Exec("DELETE FROM book_activity WHERE user_id = $1 AND book_id = $2", book.UserID, book.BookID)
+        // if err != nil {
+		// 	logger.WithField("err",err.Error()).Error("error in returning book")
+   		// 	return
+        // }
+		//return_date:=time.Now()
+		_, err = s.db.Exec("UPDATE book_activity SET isreturned='true' WHERE user_id=$1 and book_id=$2", book.UserID, book.BookID)
+     	 if err != nil {
+			logger.WithField("err",err.Error()).Error("error in updating")
+			return
+        }
+		_, err = s.db.Exec("UPDATE books SET quantity=quantity+1 WHERE book_id = $1", book.BookID)
+        if err != nil {
+			logger.WithField("err",err.Error()).Error("error in update")
+			return
+        }
+       return
+       
 }
 
 

@@ -22,9 +22,8 @@ CREATE TABLE IF NOT EXISTS books (
 
 CREATE TABLE book_activity(
    id varchar(36) NOT NULL,
-	issue_date timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-   return_date timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-
+	issue_date timestamp(3) NOT NULL  DEFAULT CURRENT_TIMESTAMP(3),
+   IsReturned BOOLEAN NOT NULL DEFAULT false,
    user_id varchar(64),
 	book_id varchar(36),
    PRIMARY KEY(id),

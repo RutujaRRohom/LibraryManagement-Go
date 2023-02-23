@@ -367,3 +367,32 @@ func getBookshandler(deps Dependencies) http.HandlerFunc{
 
 	})
 }
+
+func ReturnBookHandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request){
+		var book domain.ReturnBookRequest
+		err:= json.NewDecoder(req.Body).Decode(&book)
+		if err!=nil{
+			http.Error(w,"invalid request body",http.StatusBadRequest)
+			return
+		}
+
+		err=deps.bookService.ReturnBook(req.Context(),book)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+         	return
+		}
+
+		returned:=domain.ReturnBookResponse{
+			Message:"book returned successfully",
+		}
+		bookJSON, err := json.Marshal(returned)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bookJSON)
+
+	})
+}

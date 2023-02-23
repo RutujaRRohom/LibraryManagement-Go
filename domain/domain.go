@@ -127,4 +127,13 @@ type GetBooksResponse struct{
 
 }
 
+type ReturnBookRequest struct{
+	UserID string `json:"user_id"`
+	BookID string `json:"bookId"`
+}
+
+type ReturnBookResponse struct{
+	Message string `json:"message"`
+	}
+
 	
