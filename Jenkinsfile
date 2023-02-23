@@ -18,7 +18,7 @@ pipeline {
 
       steps {
 
-          checkout([$class: 'GitSCM', branches: [[name: '*/deployment']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/GauravMakhijani/FarmEasy/']]])
+          checkout([$class: 'GitSCM', branches: [[name: '*/deployment']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/RutujaRRohom/LibraryManagement-Go.git/']]])
 
       }
 
