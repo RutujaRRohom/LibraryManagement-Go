@@ -102,3 +102,25 @@ func ValidateJWTEmail(tokenString string) ( email string,err error) {
 
 	return email,nil
 }
+
+func ValidateUserJWT(tokenString string) ( err error) {
+	tokenObject, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, err
+		}
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		return
+	}
+	claims, ok := tokenObject.Claims.(jwt.MapClaims)
+	if !ok {
+		return
+	}
+	role := string(claims["Role"].(string))
+	if !ok || role != "user" {
+		logger.WithField("err",err.Error()).Error(" user is not end user")
+		return
+	}
+	return
+}

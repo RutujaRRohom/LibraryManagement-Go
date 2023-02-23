@@ -99,5 +99,32 @@ type ResetNameRequest struct{
 	}
 type ResetNameResponse struct{
 	Message string `json:"message"`
-		}
+	}
+
+type GetUsersResponse struct{
+	UserID string  ` json:"user_id"`
+	Email string  `json:"email"`
+	Password string ` json:"Password"`
+	Name string     `json:"Name"`	
+	Role string    ` json:"role"`	
+} 
+type GetBooksActivityResponse struct{
+	BookID string `json:"book_id"`
+	UserID string `json:"user_id"`
+	BookName string `json:"book_name"`
+	UserName string `json:"user_name"`
+	IssueDate string `json:"issue_date"`
+}
+
+type GetbooksRequest struct{
+   UserID string `json:"user_id"`
+}
+type GetBooksResponse struct{
+	UserName string `json:"user_name"`
+	BookID string `json:"book_id"`
+	BookName string `json:"book_name"`
+	IssueDate string `json:"issue_date"`
+
+}
+
 	

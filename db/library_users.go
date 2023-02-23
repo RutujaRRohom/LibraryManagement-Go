@@ -23,6 +23,9 @@ type Storer interface{
 	IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(Book domain.IssuedBookResponse,err error)
 	UpdatePassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error)
 	Updatename(ctx context.Context,email string,name domain.ResetNameRequest)(err error)
+	GetUsers(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
+	GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse,err error)
+	GetUserBooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
 
 }
 
@@ -202,6 +205,7 @@ func (s *pgStore)UpdatePassword(ctx context.Context,email string,pass domain.Res
 	
 	//check if the user exists with this email address in database
 	 //resetPasswordQuery:= `select email from users where password=$1`
+	 
 	 err = s.db.QueryRow("select email from users where password= $1",pass.CurrentPassword ).Scan(&email)
 	 fmt.Println(pass.CurrentPassword)
      if err != nil {
@@ -233,6 +237,67 @@ func (s *pgStore)Updatename(ctx context.Context,email string,name domain.ResetNa
 		}
 	return
      
+
+}
+
+
+func (s *pgStore)GetUsers(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error){
+	// getUsersQuery:=`select * from users where email LIKE $1 and name LIKE $2`
+	// rows,err:=s.db.Query(getUsersQuery,emailID,prefix)
+	rows, err := s.db.Query("SELECT * FROM users WHERE email LIKE $1 || '%' OR name LIKE $2 || '%' ", emailID, prefix)
+    fmt.Println(err)
+	if err!=nil{
+		logger.WithField("err",err.Error()).Error("error in getting users")
+		return
+	}
+	for rows.Next(){
+		var user domain.GetUsersResponse
+		err=rows.Scan(&user.UserID,&user.Email,&user.Password,&user.Name,&user.Role)
+		if err != nil {
+			logger.WithField("err", err.Error()).Error("Error scanning books")
+			return
+		}
+		users=append(users,user)
+	}
+	return users,nil
+}
+
+func (s *pgStore)GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse,err error){
+	rows,err:=s.db.Query("select  books.book_id ,users.user_id,books.book_name, users.name , book_activity.issue_date from users INNER JOIN  book_activity on users.user_id = book_activity.user_id INNER JOIN books on books.book_id = book_activity.book_id");
+	if err!=nil{
+		logger.WithField("err",err.Error()).Error("error in getting users")
+		return
+	}
+	//book_activity.issue_date 
+	for rows.Next(){
+		var books domain.GetBooksActivityResponse
+		err=rows.Scan(&books.BookID,&books.UserID,&books.BookName,&books.UserName,&books.IssueDate)
+		if err != nil {
+			logger.WithField("err", err.Error()).Error("Error scanning books")
+			return
+		}
+		book=append(book,books)
+	}
+	return book,nil
+
+}
+
+func (s *pgStore)GetUserBooks(ctx context.Context,bk domain.GetbooksRequest)(book []domain.GetBooksResponse,err error){
+	rows,err:=s.db.Query("select  users.name,books.book_id ,books.book_name , book_activity.issue_date from users INNER JOIN  book_activity on users.user_id = book_activity.user_id INNER JOIN books on books.book_id = book_activity.book_id WHERE users.user_id=$1",bk.UserID);
+	if err!=nil{
+		logger.WithField("err",err.Error()).Error("error in getting users")
+		return
+	}
+	for rows.Next(){
+		var books domain.GetBooksResponse
+		err=rows.Scan(&books.UserName,&books.BookID,&books.BookName,&books.IssueDate)
+		if err != nil {
+			logger.WithField("err", err.Error()).Error("Error scanning books")
+			return
+		}
+		book=append(book,books)
+	}
+	return book,nil
 
 }
 

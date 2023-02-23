@@ -264,14 +264,65 @@ func UpdateNameHandler(deps Dependencies) http.HandlerFunc{
 func getUserByEmailNameHandler(deps Dependencies)(http.HandlerFunc){
 	return http.HandlerFunc(func (w http.ResponseWriter,req *http.Request){
 
-        vars:=mux.Vars(req)
+       // vars:=mux.Vars(req)
+	    emailID := req.URL.Query().Get("email_pre")
+		namePrefix := req.URL.Query().Get("prefix")
+		if emailID == "" || namePrefix=="" {
+		 http.Error(w, "query paramter  is required", http.StatusUnauthorized)
+	 		return
+ 		}
+    	
+		authHeader := req.Header.Get("Authorization")
+		 if authHeader == "" {
+		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+	 		return
+ 		}
+		err := ValidateJWT(authHeader)
+		if err != nil {
+            http.Error(w,"invalid token",http.StatusUnauthorized)	
+			return
+		}
 		
-		user,err=getUsersByEmail(req.Context())
+		users,err := deps.bookService.getUsersByEmailName(req.Context(),emailID,namePrefix)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
          	return
 		}
-		userJSON,err=json.Marshal(user)
+		userJSON,err := json.Marshal(users)
+		if err!=nil{
+			http.Error(w,"error in marshelling",http.StatusBadRequest)
+			return
+
+		}
+		//w.Header().Set("Content-Type", "application/json")
+
+		w.Write(userJSON)
+
+
+	})
+}
+
+
+func getBooksActivityHandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request){
+
+		authHeader := req.Header.Get("Authorization")
+		 if authHeader == "" {
+		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+	 		return
+ 		}
+		 err := ValidateJWT(authHeader)
+		 if err != nil {
+			 http.Error(w,"invalid token",http.StatusUnauthorized)	
+			 return
+		 }
+		 
+		book,err:=deps.bookService.GetBooksActivity(req.Context())
+		if err!= nil{
+			http.Error(w,"error returning books",http.StatusBadRequest)
+			return
+		}
+		json_response,err:=json.Marshal(book)
 		if err!=nil{
 			http.Error(w,"error in marshelling",http.StatusBadRequest)
 			return
@@ -279,6 +330,40 @@ func getUserByEmailNameHandler(deps Dependencies)(http.HandlerFunc){
 		}
 		w.Write(json_response)
 
+	})
+}
+
+
+func getBookshandler(deps Dependencies) http.HandlerFunc{
+	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request){
+		var user domain.GetbooksRequest
+		err:=json.NewDecoder(req.Body).Decode(&user)
+		if err !=nil{
+			http.Error(w,"invalid request body",http.StatusBadRequest)
+		}
+	
+		authHeader := req.Header.Get("Authorization")
+		 if authHeader == "" {
+		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+	 		return
+ 		}
+		 err = ValidateUserJWT(authHeader)
+		 if err != nil {
+			 http.Error(w,"invalid token",http.StatusUnauthorized)	
+			 return
+		 }
+		 book,err:=deps.bookService.Getbooks(req.Context(),user)
+		 if err!= nil{
+			http.Error(w,"error returning books",http.StatusBadRequest)
+			return
+		}
+		json_response,err:=json.Marshal(book)
+		if err!=nil{
+			http.Error(w,"error in marshelling",http.StatusBadRequest)
+			return
+
+		}
+		w.Write(json_response)
 
 	})
 }

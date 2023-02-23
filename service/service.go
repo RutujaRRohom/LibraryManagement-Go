@@ -23,6 +23,10 @@ type Services interface{
 	IssueBook(ctx context.Context,issueReq domain.IssueBookRequest)(booked domain.IssuedBookResponse,err error)
     ResetPassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error)
 	UpdateName(ctx context.Context,email string,name domain.ResetNameRequest)(err error)
+	getUsersByEmailName(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
+	GetBooksActivity(ctx context.Context)(book []domain.GetBooksActivityResponse,err error)
+	Getbooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
+
 
 }
 
@@ -165,6 +169,34 @@ func (b *bookService)UpdateName(ctx context.Context,email string,name domain.Res
 	err = b.store.Updatename(ctx,email,name)
 	if err !=nil{
 		logrus.WithField("err", err.Error()).Error("error in reseting password")
+		return
+	}
+	return
+}
+
+
+func (b *bookService)getUsersByEmailName(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error){
+	users,err=b.store.GetUsers(ctx,emailID,prefix)
+	if err !=nil {
+		logrus.WithField("err", err.Error()).Error("error in getting users")
+		return
+	}
+	return
+}
+
+func (b *bookService)GetBooksActivity(ctx context.Context)(book []domain.GetBooksActivityResponse,err error){
+	book ,err =b.store.GetBookActivity(ctx)
+	if err != nil {
+		logrus.WithField("err", err.Error()).Error("error in getting books")
+		return
+	}
+	return
+}
+
+func (b *bookService)Getbooks(ctx context.Context,user domain.GetbooksRequest)(book []domain.GetBooksResponse,err error){
+	book,err = b.store.GetUserBooks(ctx,user)
+	if err != nil {
+		logrus.WithField("err", err.Error()).Error("error in getting books issued")
 		return
 	}
 	return
