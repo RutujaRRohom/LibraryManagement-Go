@@ -13,7 +13,7 @@ pipeline {
     stage("Build Docker Image"){
         steps{
             script{
-                sh 'sudo chmod 666 /var/run/docker.sock -S'
+//                 sh 'sudo chmod 666 /var/run/docker.sock -S'
                 sh "docker build -t library-management-ecr ." 
             }
         }
