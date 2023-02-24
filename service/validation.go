@@ -37,7 +37,7 @@ func ValidateJWT(tokenString string) ( err error) {
 		return
 	}
 	role := string(claims["Role"].(string))
-	if !ok || role != "Admin" || role !="superadmin"{
+	if !ok || (role != "Admin" && role != "superadmin") {
 		logger.WithField("err",err.Error()).Error(" user is not admin or superadmin")
 		return
 	}

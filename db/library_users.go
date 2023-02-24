@@ -26,7 +26,7 @@ type Storer interface{
 	GetUsers(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
 	GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse,err error)
 	GetUserBooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
-	ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(Quantity domain.QuantityResponse,err error)
+	ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(err error)
 
 }
 
@@ -100,7 +100,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 		logger.WithField("error occured",err.Error()).Error("error getting book id")
 		return
 	}
-	if (Book.Status=="notAvailable") || (Book.Quantity<=0){
+	if (Book.Status=="notavailable") || (Book.Quantity<=0){
 		logger.WithField("err",err.Error()).Error("book is not available ")
 		return
 	}
@@ -141,19 +141,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 
 func (s *pgStore) getBookById(ctx context.Context,BookId string)(Book domain.GetBookById,err error){
 	
-	// 	stmt, err := s.db.Prepare("SELECT * FROM books  WHERE book_id = ?")
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-    //  // var Book domain.GetBookById
-	//   err = stmt.QueryRow(BookId).Scan(&Book.BookId, &Book.BookName, &Book.BookAuthor, &Book.Publisher, &Book.Quantity,&Book.Status)
-	//   if err != nil {
-	// 	 // if err == sql.ErrNoRows {
-    //       logger.WithField("err",err.Error()).Error("error occured")
-	// 	 //}
-	// 	  return Book, err
-	//   }
-	//   return Book, nil
+	
    err=s.db.QueryRow("SELECT * FROM books  WHERE book_id = $1",BookId).Scan(&Book.BookId,&Book.BookName, &Book.BookAuthor, &Book.Publisher, &Book.Quantity,&Book.Status)
    if err != nil {
 	return Book, err
@@ -161,10 +149,6 @@ func (s *pgStore) getBookById(ctx context.Context,BookId string)(Book domain.Get
 	return Book, nil
 
 }
-
-
-
-
 
 func (s *pgStore)addUserIssuedBook(ctx context.Context,UserId string,BookId string)(err error){
 
@@ -303,31 +287,44 @@ func (s *pgStore)GetUserBooks(ctx context.Context,bk domain.GetbooksRequest)(boo
 }
 
 
-func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(Quantity domain.QuantityResponse,err error){
+func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(err error){
+	fmt.Println("bookId",book.BookID)
+	fmt.Println("userId",book.UserID)
+
 	var userExists, bookExists, bookIssued bool
      err= s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", book.UserID).Scan(&userExists)
         if err!=nil {
 			logger.WithField("err",err.Error()).Error("user not exist")
 			return
         }
+		fmt.Println("hiiiiiiii  301",userExists)
         err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM books WHERE book_id = $1)", book.BookID).Scan(&bookExists)
         if err != nil {
 			logger.WithField("err",err.Error()).Error("book with this ID not exist")
 			return
         }
+		fmt.Println("hiiiiiiii 306",bookExists)
         err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM book_activity WHERE user_id = $1 AND book_id = $2)", book.UserID, book.BookID).Scan(&bookIssued)
         if err != nil {
 			logger.WithField("err",err.Error()).Error("this book activity doesnt exists")
 			return
         }
-		// err = db.Exec("DELETE FROM book_activity WHERE user_id = $1 AND book_id = $2", book.UserID, book.BookID)
-        // if err != nil {
-		// 	logger.WithField("err",err.Error()).Error("error in returning book")
-   		// 	return
-        // }
-		//return_date:=time.Now()
-		//  var isRetured bool
-		//  isRetured="t"
+		fmt.Println("hiiiiiiii 313",bookIssued)
+
+		if !userExists {
+			logger.WithField("err",err.Error()).Error("user not found")
+            return
+        }
+        if !bookExists {
+			logger.WithField("err",err.Error()).Error("book not found")
+             return
+        }
+        if !bookIssued {
+			logger.WithField("err",err.Error()).Error("book activity  not found")
+
+            return
+        }
+		
 		var isReturned bool 
 		isReturned=true
 		_, err = s.db.Exec("UPDATE book_activity SET isreturned=$1 WHERE user_id=$2 and book_id=$3", isReturned,book.UserID, book.BookID)
@@ -336,9 +333,13 @@ func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(Q
 			logger.WithField("err",err.Error()).Error("error in updating")
 			return
         }
-		fmt.Println("rutuja")
-		var quant domain.QuantityResponse
-		quantity:=quant.Quantity+1
+		Book,err := s.getBookById(ctx,book.BookID)
+		if err != nil{
+			logger.WithField("error occured",err.Error()).Error("error getting books")
+			return
+		}
+	
+		quantity:=Book.Quantity+1
 		_, err = s.db.Exec("UPDATE books SET quantity=$1 WHERE book_id = $2",quantity, book.BookID)
         if err != nil {
 			logger.WithField("err",err.Error()).Error("error in update")
@@ -351,3 +352,18 @@ func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(Q
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 

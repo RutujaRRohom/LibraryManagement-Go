@@ -129,7 +129,7 @@ type GetBooksResponse struct{
 
 type ReturnBookRequest struct{
 	UserID string `json:"user_id"`
-	BookID string `json:"bookId"`
+	BookID string `json:"book_id"`
 }
 
 type ReturnBookResponse struct{
