@@ -382,6 +382,7 @@ func ReturnBookHandler(deps Dependencies) http.HandlerFunc{
 			http.Error(w, err.Error(), http.StatusInternalServerError)
          	return
 		}
+		//fmt.Println(status)
 
 		returned:=domain.ReturnBookResponse{
 			Message:"book returned successfully",

@@ -26,7 +26,7 @@ type Storer interface{
 	GetUsers(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
 	GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse,err error)
 	GetUserBooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
-	ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(err error)
+	ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(Quantity domain.QuantityResponse,err error)
 
 }
 
@@ -303,10 +303,10 @@ func (s *pgStore)GetUserBooks(ctx context.Context,bk domain.GetbooksRequest)(boo
 }
 
 
-func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(err error){
+func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(Quantity domain.QuantityResponse,err error){
 	var userExists, bookExists, bookIssued bool
-        err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", book.UserID).Scan(&userExists)
-        if err != nil {
+     err= s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", book.UserID).Scan(&userExists)
+        if err!=nil {
 			logger.WithField("err",err.Error()).Error("user not exist")
 			return
         }
@@ -326,18 +326,26 @@ func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(e
    		// 	return
         // }
 		//return_date:=time.Now()
-		_, err = s.db.Exec("UPDATE book_activity SET isreturned='true' WHERE user_id=$1 and book_id=$2", book.UserID, book.BookID)
+		//  var isRetured bool
+		//  isRetured="t"
+		var isReturned bool 
+		isReturned=true
+		_, err = s.db.Exec("UPDATE book_activity SET isreturned=$1 WHERE user_id=$2 and book_id=$3", isReturned,book.UserID, book.BookID)
+		fmt.Println("hello there")
      	 if err != nil {
 			logger.WithField("err",err.Error()).Error("error in updating")
 			return
         }
-		_, err = s.db.Exec("UPDATE books SET quantity=quantity+1 WHERE book_id = $1", book.BookID)
+		fmt.Println("rutuja")
+		var quant domain.QuantityResponse
+		quantity:=quant.Quantity+1
+		_, err = s.db.Exec("UPDATE books SET quantity=$1 WHERE book_id = $2",quantity, book.BookID)
         if err != nil {
 			logger.WithField("err",err.Error()).Error("error in update")
 			return
         }
-       return
-       
+		fmt.Println("rutu")
+       return 
 }
 
 

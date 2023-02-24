@@ -136,4 +136,8 @@ type ReturnBookResponse struct{
 	Message string `json:"message"`
 	}
 
+
+type QuantityResponse struct{
+	Quantity int  `json:"quantity"`
+}
 	

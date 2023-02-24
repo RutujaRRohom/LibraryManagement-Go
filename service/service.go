@@ -11,6 +11,7 @@ import(
 	"encoding/base64"
 	"time"
 	"github.com/dgrijalva/jwt-go"
+	"fmt"
 
 
 )
@@ -204,11 +205,12 @@ func (b *bookService)Getbooks(ctx context.Context,user domain.GetbooksRequest)(b
 }
 
 func (b *bookService)ReturnBook(ctx context.Context,book domain.ReturnBookRequest)(err error){
-	err=b.store.ReturnBooks(ctx,book)
+	quantity,err:=b.store.ReturnBooks(ctx,book)
 	if err != nil{
 		logrus.WithField("err", err.Error()).Error("error in getting books issued")
 		return
 	}
+	fmt.Println(quantity)
 	return
 }
 
