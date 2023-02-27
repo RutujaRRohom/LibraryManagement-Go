@@ -63,7 +63,7 @@ Status string `json:"status"`
 }
 
 type GetBookById struct{
-BookId string `json:"bookId"`
+BookId int `json:"bookId"`
 BookName string `json:"book_name"`
 BookAuthor string `json:"bookAuthor"`
 Publisher string  `json:"publisher"`
@@ -72,19 +72,19 @@ Status string `json:"status"`
 }
 
 type IssueBookRequest struct{
-	UserId string `json:"user_id"`
-	BookId string `json:"book_id"`
+	UserId int `json:"user_id"`
+	BookId int `json:"book_id"`
 }
 
 type IssuedBookResponse struct{
 	//issue_id int `json:"issue_id"`
-	UserId string `json:"user_id`
-	BookId string `json:"bookId"`
+	UserId int `json:"user_id`
+	BookId int `json:"bookId"`
 	BookName string `json:"book_name"`
     BookAuthor string `json:"bookAuthor"`
     Publisher string  `json:"publisher"`
-	Quantity int  `json:"quantity"`
-	Status string `json:"status"`
+	//Quantity int  `json:"quantity"`
+	//Status string `json:"status"`
 	//Book_Issued_at time.Time ` json:"issue_date"`
 
 }
@@ -137,8 +137,8 @@ type GetBooksResponse struct{
 }
 
 type ReturnBookRequest struct{
-	UserID string `json:"user_id"`
-	BookID string `json:"book_id"`
+	UserID int `json:"user_id"`
+	BookID int `json:"book_id"`
 }
 
 type ReturnBookResponse struct{

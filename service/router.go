@@ -18,7 +18,7 @@ func InitRouter(deps Dependencies) (router *mux.Router) {
 	router = mux.NewRouter()
 
 	// No version requirement for /ping
-	//router.HandleFunc("/ping", pingHandler).Methods(http.MethodGet)
+	router.HandleFunc("/ping", pingHandler).Methods(http.MethodGet)
 
 	//router.HandleFunc("/users", listUsersHandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/registerUser",registerUserHandler(deps)).Methods(http.MethodPost)

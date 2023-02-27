@@ -168,6 +168,10 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc{
 		if err!=nil{
 			http.Error(w,"invalid request body",http.StatusBadRequest)
 		}
+		if  issueReq.UserId == 0 ||  issueReq.UserId == 0{
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
 
 		booked,err:=deps.bookService.IssueBook(req.Context(),issueReq)
 		if err != nil {

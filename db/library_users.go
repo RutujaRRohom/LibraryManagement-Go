@@ -18,8 +18,8 @@ type Storer interface{
 	LoginUser(context.Context,string,string) (string, error)
 	AddingBook(ctx context.Context,add domain.AddBookResponse)(bookId int,err error)
     GetAllBooksFromDb(ctx context.Context) ([]domain.GetAllBooksResponse , error)
- 	getBookById(ctx context.Context,BookId string)(Book domain.GetBookById, err error)
-	addUserIssuedBook(ctx context.Context,UserId string,BookId string)(err error)
+ 	getBookById(ctx context.Context,BookId int)(Book domain.GetBookById, err error)
+	addUserIssuedBook(ctx context.Context,UserId int,BookId int)(err error)
     updateBookStatus(ctx context.Context,book domain.GetBookById)(err error)
 	IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(Book domain.IssuedBookResponse,err error)
 	UpdatePassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error)
@@ -93,9 +93,32 @@ func(s *pgStore) GetAllBooksFromDb(ctx context.Context) (books []domain.GetAllBo
 
 func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(books domain.IssuedBookResponse ,err error){
 
-    
-    // getBookByIdQuery:=`SELECT * from books where book_id=$1`
-	//var Book domain.GetBookById
+    var userExists,bookExists bool
+    err= s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", booking.UserId).Scan(&userExists)
+        if err!=nil {
+			logger.WithField("err",err.Error()).Error("user not exist")
+			//err=errors.New("user with this id not exist")
+			return
+        }
+		fmt.Println("hiiiiiiii  301",userExists)
+        err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM books WHERE book_id = $1)", booking.BookId).Scan(&bookExists)
+        if err != nil {
+			logger.WithField("err",err.Error()).Error("book with this ID not exist")
+			return
+        }
+		if !userExists {
+			err=errors.New("user not exist with this id")
+
+			logger.WithField("err",err.Error()).Error("user not found")
+            return
+        }
+		fmt.Println("line no 328")
+        if !bookExists {
+			err=errors.New("book is not issued with this id")
+
+			logger.WithField("err",err.Error()).Error("book not found")
+             return
+        }
 	Book,err := s.getBookById(ctx,booking.BookId)
 	//fmt.Println("rutuja IssuedBook 98")
 	if err != nil{
@@ -114,7 +137,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 	err = s.addUserIssuedBook(ctx,booking.UserId,booking.BookId)
     if err != nil {
 		// logger.WithField("err",err.Error()).Error("error in adding  book user")
-		err=errors.New("error in adding book user")
+		err=errors.New("user id or book id does not exist")
          return
     }
 
@@ -131,8 +154,8 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 			BookName :Book.BookName ,
     		BookAuthor :Book.BookAuthor,
    			Publisher :Book.Publisher,
-			Quantity :Book.Quantity,
-			Status :Book.Status,
+			//Quantity :Book.Quantity,
+			//Status :Book.Status,
 
 		}
 		books=issued
@@ -145,7 +168,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 
 
 
-func (s *pgStore) getBookById(ctx context.Context,BookId string)(Book domain.GetBookById,err error){
+func (s *pgStore) getBookById(ctx context.Context,BookId int)(Book domain.GetBookById,err error){
 	
 	
    err=s.db.QueryRow("SELECT * FROM books  WHERE book_id = $1",BookId).Scan(&Book.BookId,&Book.BookName, &Book.BookAuthor, &Book.Publisher, &Book.Quantity,&Book.Status)
@@ -157,7 +180,7 @@ func (s *pgStore) getBookById(ctx context.Context,BookId string)(Book domain.Get
 
 }
 
-func (s *pgStore)addUserIssuedBook(ctx context.Context,UserId string,BookId string)(err error){
+func (s *pgStore)addUserIssuedBook(ctx context.Context,UserId int,BookId int)(err error){
 
 	//issueID:= uuid.New()
 
