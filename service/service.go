@@ -17,16 +17,16 @@ import(
 )
 
 type Services interface{
-	RegisterUser(ctx context.Context,users domain.Users) (userAdded domain.UserResponse,err error)
+	RegisterUser(ctx context.Context,users domain.Users) (err error)
     Login(ctx context.Context,userAuth domain.LoginRequest)(token string,err error)
-	AddBooks(context.Context,domain.AddBook) (domain.AddBook,error)
+	AddBooks(context.Context,domain.AddBook) (domain.AddBookResponse,error)
 	GetBooks(ctx context.Context)([]domain.GetAllBooksResponse,error)
 	IssueBook(ctx context.Context,issueReq domain.IssueBookRequest)(booked domain.IssuedBookResponse,err error)
     ResetPassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error)
 	UpdateName(ctx context.Context,email string,name domain.ResetNameRequest)(err error)
 	getUsersByEmailName(ctx context.Context,emailID string,prefix string)(users []domain.GetUsersResponse,err error)
 	GetBooksActivity(ctx context.Context)(book []domain.GetBooksActivityResponse,err error)
-	Getbooks(ctx context.Context,b domain.GetbooksRequest)(book []domain.GetBooksResponse,err error)
+	Getbooks(ctx context.Context,email string)(book []domain.GetBooksResponse,err error)
 	ReturnBook(ctx context.Context,book domain.ReturnBookRequest)(err error)
 
 
@@ -67,23 +67,28 @@ func HashPassword(password string) (string){
 	return hash
 }
 
-func (b *bookService)RegisterUser(ctx context.Context,user domain.Users) (registerResponse domain.UserResponse,err error){
+func (b *bookService)RegisterUser(ctx context.Context,user domain.Users) (err error){
 
-	registerResponse = domain.UserResponse{
-		User_id :user.User_id,
-		Email   :user.Email,
-		Password :user.Password,
-		Name :user.Name,
-		Role  :user.Role,
+	// registerResponse = domain.UserResponse{
+	// 	//User_id :user.User_id,
+	// 	Email   :user.Email,
+	// 	//Password :user.Password,
+	// 	Name :user.Name,
+	// 	Role  :user.Role,
 
-	}
-	registerResponse.Password=HashPassword(registerResponse.Password)
-	err = b.store.CreateUser(ctx,registerResponse)
-	if err !=nil{
-		logrus.WithField("err", err.Error()).Error("error registering user")
+	// }
+	user.Password=HashPassword(user.Password)
+	err = b.store.CreateUser(ctx,user)
+	if err != nil {
+		logrus.WithField("err", err.Error()).Error("error registering farmer")
+		if err.Error() == "pq: duplicate key value violates unique constraint \"users_email_key\""{
+			err = ErrDuplicateEmail
+			return
+		}
 		return
+
 	}
-	return registerResponse,err
+	return 
 }
 
 
@@ -115,16 +120,27 @@ func(b *bookService) Login(ctx context.Context,userAuth domain.LoginRequest) (to
 
 
 
-func(b *bookService) AddBooks(ctx context.Context,add domain.AddBook) (added domain.AddBook,err error){
+func(b *bookService) AddBooks(ctx context.Context,add domain.AddBook) (bookAdd domain.AddBookResponse,err error){
 
+
+
+	bookAdd = domain.AddBookResponse{
+		//BookId:add.BookId,
+		BookName:add.BookName,
+		BookAuthor:add.BookAuthor,
+		Publisher:add.Publisher,
+		Quantity:add.Quantity,
+		Status:add.Status,
+	}
 	
-	err=b.store.AddingBook(ctx,add)
+	bookAdd.BookId,err=b.store.AddingBook(ctx,bookAdd)
 	if err !=nil{
 		logrus.WithField("err", err.Error()).Error("error adding book")
 		return
 	}
-	added=add
-	return added,nil
+
+	
+	return
 }
 
 
@@ -195,8 +211,8 @@ func (b *bookService)GetBooksActivity(ctx context.Context)(book []domain.GetBook
 	return
 }
 
-func (b *bookService)Getbooks(ctx context.Context,user domain.GetbooksRequest)(book []domain.GetBooksResponse,err error){
-	book,err = b.store.GetUserBooks(ctx,user)
+func (b *bookService)Getbooks(ctx context.Context,email string)(book []domain.GetBooksResponse,err error){
+	book,err = b.store.GetUserBooks(ctx,email)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("error in getting books issued")
 		return

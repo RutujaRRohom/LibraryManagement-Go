@@ -5,6 +5,7 @@ import
 "library_management/domain"
 "net/http"
 "encoding/json"
+"library_management/api"
 //"strings"
 //"fmt"
 
@@ -19,18 +20,27 @@ func registerUserHandler(dep Dependencies) http.HandlerFunc{
 			http.Error(w,"invalid request",http.StatusBadRequest)
 			return
 		 }
+		 if  user.Email == "" ||  user.Password == "" ||user.Name=="" || user.Role=="" {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
 
 		 if err=validateEmail(user.Email); err!=nil{
 			http.Error(w,"invalid mail",http.StatusBadRequest)
 			return
 		 }
 
-		 userAdded,err1:= dep.bookService.RegisterUser(req.Context(),user)
-		 if err1 != nil{
-			http.Error(w,"fail to register user",http.StatusInternalServerError)
+		 err= dep.bookService.RegisterUser(req.Context(),user)
+		 if err != nil {
+			api.Response(w, http.StatusBadRequest, api.Message{Msg: err.Error()})
 			return
+		}
+		 registerRes:=domain.UserResponse{
+			Message:"user register successfully",
+			
 		 }
-		 json_response,err:=json.Marshal(userAdded)
+		 json_response,err:=json.Marshal(registerRes)
 		 if err != nil {
 			http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
 			return
@@ -52,6 +62,11 @@ func loginUserHandler(dep Dependencies) http.HandlerFunc{
 		err := json.NewDecoder(req.Body).Decode(&userAuth)
 		if err !=nil{
 			http.Error(w,"invalid request",http.StatusBadRequest)
+			return
+		}
+
+		if  userAuth.Email == "" ||  userAuth.Password == "" {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
 
@@ -89,12 +104,15 @@ func addBooksHandler(deps Dependencies) http.HandlerFunc{
 		if err!=nil{
 			http.Error(w,"invalid request body",http.StatusBadRequest)
 		}
- //TODO validate token
+		if add.BookName=="" || add.BookAuthor=="" || add.Publisher=="" || add.Quantity== 0|| add.Status==""{
+			http.Error(w,"invalid requets body",http.StatusBadRequest)
+		}
  		authHeader := req.Header.Get("Authorization")
 		 if authHeader == "" {
 		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
 	 		return
  		}
+		
 		    // Extract the token from the Authorization header
 		//tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
 
@@ -336,23 +354,22 @@ func getBooksActivityHandler(deps Dependencies) http.HandlerFunc{
 
 func getBookshandler(deps Dependencies) http.HandlerFunc{
 	return http.HandlerFunc(func(w http.ResponseWriter,req *http.Request){
-		var user domain.GetbooksRequest
-		err:=json.NewDecoder(req.Body).Decode(&user)
-		if err !=nil{
-			http.Error(w,"invalid request body",http.StatusBadRequest)
-		}
 	
 		authHeader := req.Header.Get("Authorization")
 		 if authHeader == "" {
 		 http.Error(w, "Authorization header is required", http.StatusUnauthorized)
 	 		return
  		}
-		 err = ValidateUserJWT(authHeader)
-		 if err != nil {
-			 http.Error(w,"invalid token",http.StatusUnauthorized)	
+		 email,err:=ValidateJWTEmail(authHeader)
+		 if err != nil{
+			 http.Error(w, "invalid token", http.StatusUnauthorized)
 			 return
 		 }
-		 book,err:=deps.bookService.Getbooks(req.Context(),user)
+		 if err=validateEmail(email); err!=nil{
+			 http.Error(w,"invalid mail",http.StatusBadRequest)
+			 return
+		  }
+		 book,err:=deps.bookService.Getbooks(req.Context(),email)
 		 if err!= nil{
 			http.Error(w,"error returning books",http.StatusBadRequest)
 			return

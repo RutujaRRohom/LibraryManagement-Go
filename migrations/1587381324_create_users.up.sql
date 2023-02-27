@@ -1,8 +1,8 @@
 
 
 CREATE TABLE users(
-   user_id varchar(64) NOT NULL,
-   email varchar(320) NOT NULL ,
+   user_id  SERIAL NOT NULL  ,
+   email varchar(320) UNIQUE NOT NULL ,
   Password varchar(64) NOT NULL,
   Name varchar(255) NOT NULL ,
   role varchar(128) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users(
 );
 
 CREATE TABLE IF NOT EXISTS books (
-  book_id varchar(36) NOT NULL ,
+  book_id  SERIAL NOT NULL  ,    
   book_name varchar(128) NOT NULL,
   book_author varchar(128) NOT NULL,
   publisher varchar(128) NOT NULL ,
@@ -21,12 +21,12 @@ CREATE TABLE IF NOT EXISTS books (
 
 
 CREATE TABLE book_activity(
-   id varchar(36) NOT NULL,
+   activity_id  SERIAL NOT NULL ,
 	issue_date timestamp(3) NOT NULL  DEFAULT CURRENT_TIMESTAMP(3),
    IsReturned BOOLEAN NOT NULL DEFAULT false,
-   user_id varchar(64),
-	book_id varchar(36),
-   PRIMARY KEY(id),
+   user_id INT,
+	book_id INT,
+   PRIMARY KEY(activity_id),
 	CONSTRAINT fk_book_activity1
       FOREIGN KEY(user_id) 
 	  REFERENCES users(user_id),
