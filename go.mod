@@ -9,7 +9,7 @@ require (
 	github.com/mattes/migrate v3.0.1+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli/v2 v2.24.3
 	github.com/urfave/negroni v1.0.0
 )
