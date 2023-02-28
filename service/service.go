@@ -125,7 +125,7 @@ func(b *bookService) AddBooks(ctx context.Context,add domain.AddBook) (bookAdd d
 
 
 	bookAdd = domain.AddBookResponse{
-		//BookId:add.BookId,
+		//BookID:add.BookID,
 		BookName:add.BookName,
 		BookAuthor:add.BookAuthor,
 		Publisher:add.Publisher,
@@ -133,7 +133,7 @@ func(b *bookService) AddBooks(ctx context.Context,add domain.AddBook) (bookAdd d
 		Status:add.Status,
 	}
 	
-	bookAdd.BookId,err=b.store.AddingBook(ctx,bookAdd)
+	bookAdd.BookID,err=b.store.AddingBook(ctx,bookAdd)
 	if err !=nil{
 		logrus.WithField("err", err.Error()).Error("error adding book")
 		return

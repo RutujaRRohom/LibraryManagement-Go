@@ -15,11 +15,6 @@ type Users struct{
 
 
 type UserResponse struct{
-	// User_id int  `db:"user_id" json:"user_id"`
-	// Email string  `db:"email" json:"email"`
-	// Password string `db:"Password" json:"Password"`
-	// Name string     `db:"Name" json:"Name"`	
-	// Role string    `db:"role" json:"role"`	
   Message string `json:"message"`
 }
 
@@ -36,7 +31,7 @@ type LoginResponse struct{
 
 
 type AddBook struct{
-//BookId string `db:"book_id" json:"book_id"`
+//BookID string `db:"book_id" json:"book_id"`
 BookName string ` json:"book_name"`
 BookAuthor string `json:"book_author"`
 Publisher string  `json:"publisher"`
@@ -45,7 +40,7 @@ Status string `json:"status"`
 }
 
 type AddBookResponse struct{
-	BookId int`db:"book_id" json:"book_id"`
+	BookID int`db:"book_id" json:"book_id"`
 	BookName string `db:"book_name" json:"book_name"`
 	BookAuthor string `db:"book_author" json:"book_author"`
 	Publisher string  `db:"publisher" json:"publisher"`
@@ -54,7 +49,7 @@ type AddBookResponse struct{
 	}
 
 type GetAllBooksResponse struct{
-BookId string `json:"book_id"`
+BookID string `json:"book_id"`
 BookName string `json:"book_name"`
 BookAuthor string `json:"book_author"`
 Publisher string  `json:"publisher"`
@@ -63,7 +58,7 @@ Status string `json:"status"`
 }
 
 type GetBookById struct{
-BookId int `json:"bookId"`
+BookID int `json:"bookId"`
 BookName string `json:"book_name"`
 BookAuthor string `json:"bookAuthor"`
 Publisher string  `json:"publisher"`
@@ -72,14 +67,14 @@ Status string `json:"status"`
 }
 
 type IssueBookRequest struct{
-	UserId int `json:"user_id"`
-	BookId int `json:"book_id"`
+	UserID int `json:"user_id"`
+	BookID int `json:"book_id"`
 }
 
 type IssuedBookResponse struct{
 	//issue_id int `json:"issue_id"`
-	UserId int `json:"user_id`
-	BookId int `json:"bookId"`
+	UserID int `json:"user_id`
+	BookID int `json:"bookId"`
 	BookName string `json:"book_name"`
     BookAuthor string `json:"bookAuthor"`
     Publisher string  `json:"publisher"`
@@ -111,11 +106,15 @@ type ResetNameResponse struct{
 	}
 
 type GetUsersResponse struct{
-	UserID string  ` json:"user_id"`
-	Email string  `json:"email"`
-	Password string ` json:"Password"`
-	Name string     `json:"Name"`	
-	Role string    ` json:"role"`	
+	// UserID string  ` json:"user_id"`
+	// Email string  `json:"email"`
+	// Password string ` json:"Password"`
+	// Name string     `json:"Name"`	
+	// Role string    ` json:"role"`	
+	Name string `json:"name"`
+	BookIssued string `json:"book_issued"`
+	IssueDate string `json:"issue_date"`
+	ReturnDate string `json:"return_date"`
 } 
 type GetBooksActivityResponse struct{
 	BookID string `json:"book_id"`
@@ -123,6 +122,7 @@ type GetBooksActivityResponse struct{
 	BookName string `json:"book_name"`
 	UserName string `json:"user_name"`
 	IssueDate string `json:"issue_date"`
+	ReturnDate string `json:"return_date`
 }
 
 type GetbooksRequest struct{
@@ -133,7 +133,7 @@ type GetBooksResponse struct{
 	BookID string `json:"book_id"`
 	BookName string `json:"book_name"`
 	IssueDate string `json:"issue_date"`
-
+	ReturnDate string `json:"return_date"`
 }
 
 type ReturnBookRequest struct{

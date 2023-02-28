@@ -168,7 +168,7 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc{
 		if err!=nil{
 			http.Error(w,"invalid request body",http.StatusBadRequest)
 		}
-		if  issueReq.UserId == 0 ||  issueReq.UserId == 0{
+		if  issueReq.UserID == 0 ||  issueReq.UserID == 0{
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
@@ -178,13 +178,7 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc{
 			http.Error(w, err.Error(), http.StatusInternalServerError)
          	return
 		}
-		// var response domain.issuedBookJson
-		// json_response:= response{
-		// 	message:"book issued successfully",
-		// 	issued: booked,
-
-		// }
-		//message:="book issued successfully"
+		
 		bookJSON, err := json.Marshal(booked)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
