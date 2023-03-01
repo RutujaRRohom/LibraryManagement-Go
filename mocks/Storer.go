@@ -12,6 +12,20 @@ type Storer struct {
 	mock.Mock
 }
 
+// AddUserIssuedBook provides a mock function with given fields: ctx, UserID, BookID
+func (_m *Storer) AddUserIssuedBook(ctx context.Context, UserID int, BookID int) error {
+	ret := _m.Called(ctx, UserID, BookID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = rf(ctx, UserID, BookID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // AddingBook provides a mock function with given fields: ctx, add
 func (_m *Storer) AddingBook(ctx context.Context, add domain.AddBookResponse) (int, error) {
 	ret := _m.Called(ctx, add)
@@ -86,6 +100,27 @@ func (_m *Storer) GetBookActivity(ctx context.Context) ([]domain.GetBooksActivit
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetBookById provides a mock function with given fields: ctx, BookID
+func (_m *Storer) GetBookById(ctx context.Context, BookID int) (domain.GetBookById, error) {
+	ret := _m.Called(ctx, BookID)
+
+	var r0 domain.GetBookById
+	if rf, ok := ret.Get(0).(func(context.Context, int) domain.GetBookById); ok {
+		r0 = rf(ctx, BookID)
+	} else {
+		r0 = ret.Get(0).(domain.GetBookById)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = rf(ctx, BookID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -195,6 +230,20 @@ func (_m *Storer) ReturnBooks(ctx context.Context, book domain.ReturnBookRequest
 	return r0
 }
 
+// UpdateBookStatus provides a mock function with given fields: ctx, book
+func (_m *Storer) UpdateBookStatus(ctx context.Context, book domain.GetBookById) error {
+	ret := _m.Called(ctx, book)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetBookById) error); ok {
+		r0 = rf(ctx, book)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdatePassword provides a mock function with given fields: ctx, email, pass
 func (_m *Storer) UpdatePassword(ctx context.Context, email string, pass domain.ResetPasswordRequest) error {
 	ret := _m.Called(ctx, email, pass)
@@ -216,55 +265,6 @@ func (_m *Storer) Updatename(ctx context.Context, email string, name domain.Rese
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, domain.ResetNameRequest) error); ok {
 		r0 = rf(ctx, email, name)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// addUserIssuedBook provides a mock function with given fields: ctx, UserID, BookID
-func (_m *Storer) addUserIssuedBook(ctx context.Context, UserID int, BookID int) error {
-	ret := _m.Called(ctx, UserID, BookID)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
-		r0 = rf(ctx, UserID, BookID)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// getBookById provides a mock function with given fields: ctx, BookID
-func (_m *Storer) getBookById(ctx context.Context, BookID int) (domain.GetBookById, error) {
-	ret := _m.Called(ctx, BookID)
-
-	var r0 domain.GetBookById
-	if rf, ok := ret.Get(0).(func(context.Context, int) domain.GetBookById); ok {
-		r0 = rf(ctx, BookID)
-	} else {
-		r0 = ret.Get(0).(domain.GetBookById)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
-		r1 = rf(ctx, BookID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// updateBookStatus provides a mock function with given fields: ctx, book
-func (_m *Storer) updateBookStatus(ctx context.Context, book domain.GetBookById) error {
-	ret := _m.Called(ctx, book)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetBookById) error); ok {
-		r0 = rf(ctx, book)
 	} else {
 		r0 = ret.Error(0)
 	}

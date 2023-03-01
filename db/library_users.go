@@ -18,9 +18,9 @@ type Storer interface{
 	LoginUser(context.Context,string,string) (string, error)
 	AddingBook(ctx context.Context,add domain.AddBookResponse)(bookId int,err error)
     GetAllBooksFromDb(ctx context.Context) ([]domain.GetAllBooksResponse , error)
- 	getBookById(ctx context.Context,BookID int)(Book domain.GetBookById, err error)
-	addUserIssuedBook(ctx context.Context,UserID int,BookID int)(err error)
-    updateBookStatus(ctx context.Context,book domain.GetBookById)(err error)
+ 	GetBookById(ctx context.Context,BookID int)(Book domain.GetBookById, err error)
+	AddUserIssuedBook(ctx context.Context,UserID int,BookID int)(err error)
+    UpdateBookStatus(ctx context.Context,book domain.GetBookById)(err error)
 	IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(Book domain.IssuedBookResponse,err error)
 	UpdatePassword(ctx context.Context,email string,pass domain.ResetPasswordRequest)(err error)
 	Updatename(ctx context.Context,email string,name domain.ResetNameRequest)(err error)
@@ -119,7 +119,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 			logger.WithField("err",err.Error()).Error("book not found")
              return
         }
-	Book,err := s.getBookById(ctx,booking.BookID)
+	Book,err := s.GetBookById(ctx,booking.BookID)
 	//fmt.Println("rutuja IssuedBook 98")
 	if err != nil{
 		//logger.WithField("error occured",err.Error()).Error("error getting book id")
@@ -134,14 +134,14 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 	fmt.Println("error at 107")
 	//fmt.Println("rutuja IssuedBook 107", Book)
 	//TODO getUser()
-	err = s.addUserIssuedBook(ctx,booking.UserID,booking.BookID)
+	err = s.AddUserIssuedBook(ctx,booking.UserID,booking.BookID)
     if err != nil {
 		// logger.WithField("err",err.Error()).Error("error in adding  book user")
 		err=errors.New("user id or book id does not exist")
          return
     }
 
-		err=s.updateBookStatus(ctx,Book)
+		err=s.UpdateBookStatus(ctx,Book)
 		if err !=nil{
 			logger.WithField("err",err.Error()).Error("error in updating book")
 			return
@@ -168,7 +168,7 @@ func(s *pgStore)IssuedBook(ctx context.Context,booking domain.IssueBookRequest)(
 
 
 
-func (s *pgStore) getBookById(ctx context.Context,BookID int)(Book domain.GetBookById,err error){
+func (s *pgStore) GetBookById(ctx context.Context,BookID int)(Book domain.GetBookById,err error){
 	
 	
    err=s.db.QueryRow("SELECT * FROM books  WHERE book_id = $1",BookID).Scan(&Book.BookID,&Book.BookName, &Book.BookAuthor, &Book.Publisher, &Book.Quantity,&Book.Status)
@@ -180,7 +180,7 @@ func (s *pgStore) getBookById(ctx context.Context,BookID int)(Book domain.GetBoo
 
 }
 
-func (s *pgStore)addUserIssuedBook(ctx context.Context,UserID int,BookID int)(err error){
+func (s *pgStore)AddUserIssuedBook(ctx context.Context,UserID int,BookID int)(err error){
 
 	//issueID:= uuid.New()
 
@@ -194,7 +194,7 @@ func (s *pgStore)addUserIssuedBook(ctx context.Context,UserID int,BookID int)(er
     return 
 }
 
-func (s *pgStore)updateBookStatus(ctx context.Context, book domain.GetBookById)(err error){
+func (s *pgStore)UpdateBookStatus(ctx context.Context, book domain.GetBookById)(err error){
 	// Update the book quantity in the database
 	quantity := book.Quantity -1
 	if quantity <=0{
@@ -398,7 +398,7 @@ func(s *pgStore)ReturnBooks(ctx context.Context,book domain.ReturnBookRequest)(e
 			logger.WithField("err",err.Error()).Error("error in updating")
 			return
         }
-		Book,err := s.getBookById(ctx,book.BookID)
+		Book,err := s.GetBookById(ctx,book.BookID)
 		if err != nil{
 			logger.WithField("error occured",err.Error()).Error("error getting books")
 			return
