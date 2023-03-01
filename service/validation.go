@@ -1,28 +1,23 @@
 package service
-import
-(
-	"regexp"
+
+import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"regexp"
 	//"net/http"
 	logger "github.com/sirupsen/logrus"
-
-
 )
 
-
-func validateEmail(email string) (err error){
-	em:=regexp.MustCompile(`^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$`)
-	if !em.MatchString(email){
-		err=errors.New("invalid email")
+func validateEmail(email string) (err error) {
+	em := regexp.MustCompile(`^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$`)
+	if !em.MatchString(email) {
+		err = errors.New("invalid email")
 		return
 	}
-	return 
+	return
 }
 
-
-
-func ValidateJWT(tokenString string) ( err error) {
+func ValidateJWT(tokenString string) (err error) {
 	tokenObject, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, err
@@ -38,15 +33,14 @@ func ValidateJWT(tokenString string) ( err error) {
 	}
 	role := string(claims["Role"].(string))
 	if !ok || (role != "Admin" && role != "superadmin") {
-		err=errors.New("user is not admin or superadmin")
-		logger.WithField("err",err.Error()).Error(" user is not admin or superadmin")
+		err = errors.New("user is not admin or superadmin")
+		logger.WithField("err", err.Error()).Error(" user is not admin or superadmin")
 		return
 	}
 	return
 }
 
-
-func ValidateJWTEmail(tokenString string) ( email string,err error) {
+func ValidateJWTEmail(tokenString string) (email string, err error) {
 	tokenObject, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, err
@@ -62,10 +56,10 @@ func ValidateJWTEmail(tokenString string) ( email string,err error) {
 	}
 	email = string(claims["email"].(string))
 
-	return email,nil
+	return email, nil
 }
 
-func ValidateUserJWT(tokenString string) ( err error) {
+func ValidateUserJWT(tokenString string) (err error) {
 	tokenObject, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, err
@@ -81,7 +75,7 @@ func ValidateUserJWT(tokenString string) ( err error) {
 	}
 	role := string(claims["Role"].(string))
 	if !ok || role != "user" {
-		logger.WithField("err",err.Error()).Error(" user is not end user")
+		logger.WithField("err", err.Error()).Error(" user is not end user")
 		return
 	}
 	return

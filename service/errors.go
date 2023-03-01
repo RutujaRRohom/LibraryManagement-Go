@@ -1,12 +1,9 @@
 package service
 
-import(
+import (
 	"errors"
 )
 
-var(
-ErrDuplicateEmail=errors.New("User already exists")
-
+var (
+	ErrDuplicateEmail = errors.New("User already exists")
 )
-
-
