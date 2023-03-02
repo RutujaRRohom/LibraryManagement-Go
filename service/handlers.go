@@ -275,7 +275,7 @@ func getUserByEmailNameHandler(deps Dependencies) http.HandlerFunc {
 			return
 		}
 
-		users, err := deps.bookService.getUsersByEmailName(req.Context(), emailID, namePrefix)
+		users, err := deps.bookService.GetUsersByEmailName(req.Context(), emailID, namePrefix)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

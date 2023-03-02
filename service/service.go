@@ -2,15 +2,18 @@ package service
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"library_management/db"
 	"library_management/domain"
+
+	"github.com/sirupsen/logrus"
+
 	//"golang.org/x/crypto/bcrypt"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 	//"fmt"
 )
 
@@ -22,7 +25,7 @@ type Services interface {
 	IssueBook(ctx context.Context, issueReq domain.IssueBookRequest) (booked domain.IssuedBookResponse, err error)
 	ResetPassword(ctx context.Context, email string, pass domain.ResetPasswordRequest) (err error)
 	UpdateName(ctx context.Context, email string, name domain.ResetNameRequest) (err error)
-	getUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error)
+	GetUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error)
 	GetBooksActivity(ctx context.Context) (book []domain.GetBooksActivityResponse, err error)
 	Getbooks(ctx context.Context, email string) (book []domain.GetBooksResponse, err error)
 	ReturnBook(ctx context.Context, book domain.ReturnBookRequest) (err error)
@@ -171,7 +174,7 @@ func (b *bookService) UpdateName(ctx context.Context, email string, name domain.
 	return
 }
 
-func (b *bookService) getUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error) {
+func (b *bookService) GetUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error) {
 	users, err = b.store.GetUsers(ctx, emailID, prefix)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("error in getting users")

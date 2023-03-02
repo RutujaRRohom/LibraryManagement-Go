@@ -490,7 +490,7 @@ func (s *ServiceTestSuite) TestgetUsersByEmailName() {
 
 	for _, tt := range tests {
 		tt.prepare(tt.args, s.repo)
-		result, err := s.service.getUsersByEmailName(tt.args.ctx, tt.args.email, tt.args.name)
+		result, err := s.service.GetUsersByEmailName(tt.args.ctx, tt.args.email, tt.args.name)
 		if tt.wantErr {
 			require.Error(t, err)
 		} else {
@@ -605,7 +605,7 @@ func (s *ServiceTestSuite) TestGetbooksusers() {
 
 }
 
-func(s *ServiceTestSuite) TestReturnbook(){
+func (s *ServiceTestSuite) TestReturnbook() {
 	t := s.T()
 
 	type args struct {
@@ -620,45 +620,44 @@ func(s *ServiceTestSuite) TestReturnbook(){
 		prepare func(args, *mocks.Storer)
 	}{
 		{
-			name:"if user is valid ",
-			args:args{
-				ctx :context.TODO(),
-				issue:domain.ReturnBookRequest{
-					UserID:2,
-					BookID:3,
+			name: "if user is valid ",
+			args: args{
+				ctx: context.TODO(),
+				issue: domain.ReturnBookRequest{
+					UserID: 2,
+					BookID: 3,
 				},
 			},
-			wantErr:false,
-			prepare:func(a args,s *mocks.Storer){
-				s.On("ReturnBooks",context.TODO(),mock.Anything).Return(nil).Once()
+			wantErr: false,
+			prepare: func(a args, s *mocks.Storer) {
+				s.On("ReturnBooks", context.TODO(), mock.Anything).Return(nil).Once()
 			},
 		},
 		{
-			name:"if user is not valid ",
-			args:args{
-				ctx :context.TODO(),
-				issue:domain.ReturnBookRequest{
-					UserID:2,
-					BookID:3,
+			name: "if user is not valid ",
+			args: args{
+				ctx: context.TODO(),
+				issue: domain.ReturnBookRequest{
+					UserID: 2,
+					BookID: 3,
 				},
 			},
-			wantErr:true,
-			prepare:func(a args,s *mocks.Storer){
-				s.On("ReturnBooks",context.TODO(),mock.Anything).Return(errors.New("invalid token")).Once()
+			wantErr: true,
+			prepare: func(a args, s *mocks.Storer) {
+				s.On("ReturnBooks", context.TODO(), mock.Anything).Return(errors.New("invalid token")).Once()
 			},
 		},
 	}
-	for _,tt:=range tests{
-		t.Run(tt.name,func(t *testing.T){
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			tt.prepare(tt.args, s.repo)
-			 err := s.service.ReturnBook(tt.args.ctx, tt.args.issue)
+			err := s.service.ReturnBook(tt.args.ctx, tt.args.issue)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
 			}
-			
-		
+
 		})
 	}
 }
