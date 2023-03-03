@@ -22,13 +22,13 @@ type Services interface {
 	Login(ctx context.Context, userAuth domain.LoginRequest) (token string, err error)
 	AddBooks(context.Context, domain.AddBook) (domain.AddBookResponse, error)
 	GetBooks(ctx context.Context) ([]domain.GetAllBooksResponse, error)
-	IssueBook(ctx context.Context, issueReq domain.IssueBookRequest) (booked domain.IssuedBookResponse, err error)
+	IssueBook(ctx context.Context, UserID int, issueReq domain.IssueBookRequest) (booked domain.IssuedBookResponse, err error)
 	ResetPassword(ctx context.Context, email string, pass domain.ResetPasswordRequest) (err error)
 	UpdateName(ctx context.Context, email string, name domain.ResetNameRequest) (err error)
 	GetUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error)
 	GetBooksActivity(ctx context.Context) (book []domain.GetBooksActivityResponse, err error)
 	Getbooks(ctx context.Context, email string) (book []domain.GetBooksResponse, err error)
-	ReturnBook(ctx context.Context, book domain.ReturnBookRequest) (err error)
+	ReturnBook(ctx context.Context, UserID int, book domain.ReturnBookRequest) (err error)
 }
 
 type bookService struct {
@@ -44,12 +44,13 @@ func NewBookService(s db.Storer) Services {
 
 var secretKey = []byte("81mohomrajutr")
 
-func GenerateToken(role string, email string) (token string, err error) {
+func GenerateToken(role string, UserID int, email string) (token string, err error) {
 	tokenExpirationTime := time.Now().Add(time.Hour * 24)
 	tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"Role":  role,
-		"email": email,
-		"exp":   tokenExpirationTime.Unix(),
+		"Role":    role,
+		"user_id": UserID,
+		"email":   email,
+		"exp":     tokenExpirationTime.Unix(),
 	})
 	token, err = tokenObject.SignedString(secretKey)
 	return
@@ -66,14 +67,6 @@ func HashPassword(password string) string {
 
 func (b *bookService) RegisterUser(ctx context.Context, user domain.Users) (err error) {
 
-	// registerResponse = domain.UserResponse{
-	// 	//User_id :user.User_id,
-	// 	Email   :user.Email,
-	// 	//Password :user.Password,
-	// 	Name :user.Name,
-	// 	Role  :user.Role,
-
-	// }
 	user.Password = HashPassword(user.Password)
 	err = b.store.CreateUser(ctx, user)
 	if err != nil {
@@ -90,20 +83,17 @@ func (b *bookService) RegisterUser(ctx context.Context, user domain.Users) (err 
 
 func (b *bookService) Login(ctx context.Context, userAuth domain.LoginRequest) (token string, err error) {
 
-	// var u_id int
 	userAuth.Password = HashPassword(userAuth.Password)
-	// if err!=nil{
-	// 	errors.New("encryption failed")
-	// 	return
-	// }
+
 	var role string
-	role, err = b.store.LoginUser(ctx, userAuth.Email, userAuth.Password)
+	var UserID int
+	role, UserID, err = b.store.LoginUser(ctx, userAuth.Email, userAuth.Password)
 	if err != nil {
-		errors.New("error")
+		err = errors.New("error in log in")
 		return
 	}
 
-	token, err = GenerateToken(role, userAuth.Email)
+	token, err = GenerateToken(role, UserID, userAuth.Email)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("error generating jwt token for user")
 		return
@@ -142,8 +132,8 @@ func (b *bookService) GetBooks(ctx context.Context) (books []domain.GetAllBooksR
 	return
 }
 
-func (b *bookService) IssueBook(ctx context.Context, issueReq domain.IssueBookRequest) (booked domain.IssuedBookResponse, err error) {
-	booked, err = b.store.IssuedBook(ctx, issueReq)
+func (b *bookService) IssueBook(ctx context.Context, UserID int, issueReq domain.IssueBookRequest) (booked domain.IssuedBookResponse, err error) {
+	booked, err = b.store.IssuedBook(ctx, UserID, issueReq)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("error in issuing books")
 		return
@@ -201,8 +191,8 @@ func (b *bookService) Getbooks(ctx context.Context, email string) (book []domain
 	return
 }
 
-func (b *bookService) ReturnBook(ctx context.Context, book domain.ReturnBookRequest) (err error) {
-	err = b.store.ReturnBooks(ctx, book)
+func (b *bookService) ReturnBook(ctx context.Context, UserID int, book domain.ReturnBookRequest) (err error) {
+	err = b.store.ReturnBooks(ctx, UserID, book)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("error in getting books issued")
 		return

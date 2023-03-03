@@ -22,7 +22,7 @@ const (
 	migrationPath = "./migrations"
 )
 
-var errFindingDriver = errors.New("no migrate driver instance found")
+//var errFindingDriver = errors.New("no migrate driver instance found")
 
 type pgStore struct {
 	db *sqlx.DB

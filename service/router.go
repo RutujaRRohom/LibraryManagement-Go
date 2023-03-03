@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	versionHeader = "Accept"
-)
+// const (
+// 	versionHeader = "Accept"
+// )
 
 /* The routing mechanism. Mux helps us define handler functions and the access methods */
 func InitRouter(deps Dependencies) (router *mux.Router) {
@@ -21,8 +21,8 @@ func InitRouter(deps Dependencies) (router *mux.Router) {
 	router.HandleFunc("/ping", pingHandler).Methods(http.MethodGet)
 
 	//router.HandleFunc("/users", listUsersHandler(deps)).Methods(http.MethodGet)
-	router.HandleFunc("register", registerUserHandler(deps)).Methods(http.MethodPost)
-	router.HandleFunc("login", loginUserHandler(deps)).Methods(http.MethodPost)
+	router.HandleFunc("/register", registerUserHandler(deps)).Methods(http.MethodPost)
+	router.HandleFunc("/login", loginUserHandler(deps)).Methods(http.MethodPost)
 	router.HandleFunc("/addbook", addBooksHandler(deps)).Methods(http.MethodPost)
 	router.HandleFunc("/books", getAllBooksHandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/issue", issueBookHandler(deps)).Methods(http.MethodPost)

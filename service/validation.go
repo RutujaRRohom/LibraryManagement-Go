@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"regexp"
+
+	"github.com/dgrijalva/jwt-go"
+
 	//"net/http"
 	logger "github.com/sirupsen/logrus"
 )
@@ -79,4 +81,23 @@ func ValidateUserJWT(tokenString string) (err error) {
 		return
 	}
 	return
+}
+
+func ValidateJWTId(tokenString string) (UserID int, err error) {
+	tokenObject, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, err
+		}
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		return
+	}
+	claims, ok := tokenObject.Claims.(jwt.MapClaims)
+	if !ok {
+		return
+	}
+	UserID = int(claims["user_id"].(float64))
+
+	return UserID, nil
 }

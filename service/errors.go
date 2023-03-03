@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	ErrDuplicateEmail = errors.New("User already exists")
+	ErrDuplicateEmail = errors.New("user already exists")
 )

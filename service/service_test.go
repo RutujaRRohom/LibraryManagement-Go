@@ -135,7 +135,7 @@ func (s *ServiceTestSuite) Testbookservice_Login() {
 			},
 			wantErr: false,
 			prepare: func(a args, s *mocks.Storer) {
-				s.On("LoginUser", context.TODO(), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return("Admin", nil).Once()
+				s.On("LoginUser", context.TODO(), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return("Admin", 14, nil).Once()
 			},
 		},
 		{
@@ -149,7 +149,7 @@ func (s *ServiceTestSuite) Testbookservice_Login() {
 			},
 			wantErr: true,
 			prepare: func(a args, s *mocks.Storer) {
-				s.On("LoginUser", context.TODO(), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return("Admin", errors.New("sql: no rows in result set")).Once()
+				s.On("LoginUser", context.TODO(), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return("", 14, errors.New("sql: no rows in result set")).Once()
 			},
 		},
 	}
@@ -273,56 +273,6 @@ func (s *ServiceTestSuite) TestGetbooks() {
 				require.NoError(t, err)
 			}
 			assert.IsType(t, []domain.GetAllBooksResponse{}, books)
-		})
-	}
-}
-
-func (s *ServiceTestSuite) TestIssuebook() {
-	t := s.T()
-	type args struct {
-		ctx   context.Context
-		issue domain.IssueBookRequest
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-		prepare func(args, *mocks.Storer)
-	}{
-		{
-			name: "for valid user_id and book_id",
-			args: args{
-				ctx: context.TODO(),
-				issue: domain.IssueBookRequest{
-					UserID: 2,
-					BookID: 3,
-				},
-			},
-			wantErr: false,
-			prepare: func(a args, s *mocks.Storer) {
-				s.On("IssuedBook", context.TODO(), mock.Anything).Return(domain.IssuedBookResponse{}, nil).Once()
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.prepare(tt.args, s.repo)
-
-			s.repo.On("GetBookById", context.TODO(), mock.Anything).Return(domain.GetBookById{}, nil).Once()
-
-			s.repo.On("AddUserIssuedBook", context.TODO(), mock.Anything, mock.Anything).Return(nil).Once()
-
-			s.repo.On("UpdateBookStatus", context.TODO(), mock.Anything).Return(nil).Once()
-
-			issued, err := s.service.IssueBook(tt.args.ctx, tt.args.issue)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-			assert.IsType(t, domain.IssuedBookResponse{}, issued)
-
 		})
 	}
 }
@@ -605,14 +555,13 @@ func (s *ServiceTestSuite) TestGetbooksusers() {
 
 }
 
-func (s *ServiceTestSuite) TestReturnbook() {
+func (s *ServiceTestSuite) TestIssuebook() {
 	t := s.T()
-
 	type args struct {
-		ctx   context.Context
-		issue domain.ReturnBookRequest
+		ctx    context.Context
+		UserID int
+		issue  domain.IssueBookRequest
 	}
-
 	tests := []struct {
 		name    string
 		args    args
@@ -620,38 +569,103 @@ func (s *ServiceTestSuite) TestReturnbook() {
 		prepare func(args, *mocks.Storer)
 	}{
 		{
-			name: "if user is valid ",
+			name: "for valid book_id",
 			args: args{
-				ctx: context.TODO(),
-				issue: domain.ReturnBookRequest{
-					UserID: 2,
+				ctx:    context.TODO(),
+				UserID: 2,
+				issue: domain.IssueBookRequest{
+
 					BookID: 3,
 				},
 			},
 			wantErr: false,
 			prepare: func(a args, s *mocks.Storer) {
-				s.On("ReturnBooks", context.TODO(), mock.Anything).Return(nil).Once()
+				s.On("IssuedBook", context.TODO(), mock.Anything, mock.Anything).Return(domain.IssuedBookResponse{}, nil).Once()
 			},
 		},
 		{
-			name: "if user is not valid ",
+			name: "for invalid book_id",
 			args: args{
-				ctx: context.TODO(),
-				issue: domain.ReturnBookRequest{
-					UserID: 2,
-					BookID: 3,
+				ctx:    context.TODO(),
+				UserID: 2,
+				issue: domain.IssueBookRequest{
+
+					BookID: 50,
 				},
 			},
 			wantErr: true,
 			prepare: func(a args, s *mocks.Storer) {
-				s.On("ReturnBooks", context.TODO(), mock.Anything).Return(errors.New("invalid token")).Once()
+				s.On("IssuedBook", context.TODO(), mock.Anything, mock.Anything).Return(domain.IssuedBookResponse{}, errors.New("book not exist with this id")).Once()
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.prepare(tt.args, s.repo)
-			err := s.service.ReturnBook(tt.args.ctx, tt.args.issue)
+
+			issued, err := s.service.IssueBook(tt.args.ctx, tt.args.UserID, tt.args.issue)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+			assert.IsType(t, domain.IssuedBookResponse{}, issued)
+
+		})
+	}
+}
+
+func (s *ServiceTestSuite) TestReturnBook() {
+	t := s.T()
+	type args struct {
+		ctx      context.Context
+		UserID   int
+		returned domain.ReturnBookRequest
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		prepare func(args, *mocks.Storer)
+	}{
+		{
+			name: "for valid book_id",
+			args: args{
+				ctx:    context.TODO(),
+				UserID: 2,
+				returned: domain.ReturnBookRequest{
+
+					BookID: 3,
+				},
+			},
+			wantErr: false,
+			prepare: func(a args, s *mocks.Storer) {
+				s.On("ReturnBooks", context.TODO(), mock.Anything, mock.Anything).Return(nil).Once()
+			},
+		},
+		{
+			name: "for invalid book_id",
+			args: args{
+				ctx:    context.TODO(),
+				UserID: 2,
+				returned: domain.ReturnBookRequest{
+
+					BookID: 50,
+				},
+			},
+			wantErr: true,
+			prepare: func(a args, s *mocks.Storer) {
+				s.On("ReturnBooks", context.TODO(), mock.Anything, mock.Anything).Return(errors.New("book not exist with this id")).Once()
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.prepare(tt.args, s.repo)
+
+			err := s.service.ReturnBook(tt.args.ctx, tt.args.UserID, tt.args.returned)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

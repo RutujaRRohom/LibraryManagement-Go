@@ -174,20 +174,20 @@ func (_m *Storer) GetUsers(ctx context.Context, emailID string, prefix string) (
 	return r0, r1
 }
 
-// IssuedBook provides a mock function with given fields: ctx, booking
-func (_m *Storer) IssuedBook(ctx context.Context, booking domain.IssueBookRequest) (domain.IssuedBookResponse, error) {
-	ret := _m.Called(ctx, booking)
+// IssuedBook provides a mock function with given fields: ctx, UserID, Userbooking
+func (_m *Storer) IssuedBook(ctx context.Context, UserID int, Userbooking domain.IssueBookRequest) (domain.IssuedBookResponse, error) {
+	ret := _m.Called(ctx, UserID, Userbooking)
 
 	var r0 domain.IssuedBookResponse
-	if rf, ok := ret.Get(0).(func(context.Context, domain.IssueBookRequest) domain.IssuedBookResponse); ok {
-		r0 = rf(ctx, booking)
+	if rf, ok := ret.Get(0).(func(context.Context, int, domain.IssueBookRequest) domain.IssuedBookResponse); ok {
+		r0 = rf(ctx, UserID, Userbooking)
 	} else {
 		r0 = ret.Get(0).(domain.IssuedBookResponse)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, domain.IssueBookRequest) error); ok {
-		r1 = rf(ctx, booking)
+	if rf, ok := ret.Get(1).(func(context.Context, int, domain.IssueBookRequest) error); ok {
+		r1 = rf(ctx, UserID, Userbooking)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -196,7 +196,7 @@ func (_m *Storer) IssuedBook(ctx context.Context, booking domain.IssueBookReques
 }
 
 // LoginUser provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Storer) LoginUser(_a0 context.Context, _a1 string, _a2 string) (string, error) {
+func (_m *Storer) LoginUser(_a0 context.Context, _a1 string, _a2 string) (string, int, error) {
 	ret := _m.Called(_a0, _a1, _a2)
 
 	var r0 string
@@ -206,23 +206,30 @@ func (_m *Storer) LoginUser(_a0 context.Context, _a1 string, _a2 string) (string
 		r0 = ret.Get(0).(string)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+	var r1 int
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) int); ok {
 		r1 = rf(_a0, _a1, _a2)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(int)
 	}
 
-	return r0, r1
+	var r2 error
+	if rf, ok := ret.Get(2).(func(context.Context, string, string) error); ok {
+		r2 = rf(_a0, _a1, _a2)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
-// ReturnBooks provides a mock function with given fields: ctx, book
-func (_m *Storer) ReturnBooks(ctx context.Context, book domain.ReturnBookRequest) error {
-	ret := _m.Called(ctx, book)
+// ReturnBooks provides a mock function with given fields: ctx, UserID, book
+func (_m *Storer) ReturnBooks(ctx context.Context, UserID int, book domain.ReturnBookRequest) error {
+	ret := _m.Called(ctx, UserID, book)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ReturnBookRequest) error); ok {
-		r0 = rf(ctx, book)
+	if rf, ok := ret.Get(0).(func(context.Context, int, domain.ReturnBookRequest) error); ok {
+		r0 = rf(ctx, UserID, book)
 	} else {
 		r0 = ret.Error(0)
 	}

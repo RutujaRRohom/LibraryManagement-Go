@@ -78,6 +78,29 @@ func (_m *Services) GetBooksActivity(ctx context.Context) ([]domain.GetBooksActi
 	return r0, r1
 }
 
+// GetUsersByEmailName provides a mock function with given fields: ctx, emailID, prefix
+func (_m *Services) GetUsersByEmailName(ctx context.Context, emailID string, prefix string) ([]domain.GetUsersResponse, error) {
+	ret := _m.Called(ctx, emailID, prefix)
+
+	var r0 []domain.GetUsersResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) []domain.GetUsersResponse); ok {
+		r0 = rf(ctx, emailID, prefix)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.GetUsersResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, emailID, prefix)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Getbooks provides a mock function with given fields: ctx, email
 func (_m *Services) Getbooks(ctx context.Context, email string) ([]domain.GetBooksResponse, error) {
 	ret := _m.Called(ctx, email)
@@ -101,20 +124,20 @@ func (_m *Services) Getbooks(ctx context.Context, email string) ([]domain.GetBoo
 	return r0, r1
 }
 
-// IssueBook provides a mock function with given fields: ctx, issueReq
-func (_m *Services) IssueBook(ctx context.Context, issueReq domain.IssueBookRequest) (domain.IssuedBookResponse, error) {
-	ret := _m.Called(ctx, issueReq)
+// IssueBook provides a mock function with given fields: ctx, UserID, issueReq
+func (_m *Services) IssueBook(ctx context.Context, UserID int, issueReq domain.IssueBookRequest) (domain.IssuedBookResponse, error) {
+	ret := _m.Called(ctx, UserID, issueReq)
 
 	var r0 domain.IssuedBookResponse
-	if rf, ok := ret.Get(0).(func(context.Context, domain.IssueBookRequest) domain.IssuedBookResponse); ok {
-		r0 = rf(ctx, issueReq)
+	if rf, ok := ret.Get(0).(func(context.Context, int, domain.IssueBookRequest) domain.IssuedBookResponse); ok {
+		r0 = rf(ctx, UserID, issueReq)
 	} else {
 		r0 = ret.Get(0).(domain.IssuedBookResponse)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, domain.IssueBookRequest) error); ok {
-		r1 = rf(ctx, issueReq)
+	if rf, ok := ret.Get(1).(func(context.Context, int, domain.IssueBookRequest) error); ok {
+		r1 = rf(ctx, UserID, issueReq)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -171,13 +194,13 @@ func (_m *Services) ResetPassword(ctx context.Context, email string, pass domain
 	return r0
 }
 
-// ReturnBook provides a mock function with given fields: ctx, book
-func (_m *Services) ReturnBook(ctx context.Context, book domain.ReturnBookRequest) error {
-	ret := _m.Called(ctx, book)
+// ReturnBook provides a mock function with given fields: ctx, UserID, book
+func (_m *Services) ReturnBook(ctx context.Context, UserID int, book domain.ReturnBookRequest) error {
+	ret := _m.Called(ctx, UserID, book)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ReturnBookRequest) error); ok {
-		r0 = rf(ctx, book)
+	if rf, ok := ret.Get(0).(func(context.Context, int, domain.ReturnBookRequest) error); ok {
+		r0 = rf(ctx, UserID, book)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -197,27 +220,4 @@ func (_m *Services) UpdateName(ctx context.Context, email string, name domain.Re
 	}
 
 	return r0
-}
-
-// getUsersByEmailName provides a mock function with given fields: ctx, emailID, prefix
-func (_m *Services) getUsersByEmailName(ctx context.Context, emailID string, prefix string) ([]domain.GetUsersResponse, error) {
-	ret := _m.Called(ctx, emailID, prefix)
-
-	var r0 []domain.GetUsersResponse
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) []domain.GetUsersResponse); ok {
-		r0 = rf(ctx, emailID, prefix)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.GetUsersResponse)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, emailID, prefix)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
 }
