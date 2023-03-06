@@ -83,6 +83,8 @@ func loginUserHandler(dep Dependencies) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 
 		}
+		w.Header().Add("Content-Type", "application/json")
+
 		w.Write(json_response)
 
 	})
@@ -126,6 +128,8 @@ func addBooksHandler(deps Dependencies) http.HandlerFunc {
 			http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
 			return
 		}
+		w.Header().Add("Content-Type", "application/json")
+
 		w.Write(json_response)
 
 	})
@@ -146,6 +150,8 @@ func getAllBooksHandler(deps Dependencies) http.HandlerFunc {
 			return
 
 		}
+		w.Header().Add("Content-Type", "application/json")
+
 		w.Write(json_response)
 	})
 }
@@ -276,13 +282,13 @@ func UpdateNameHandler(deps Dependencies) http.HandlerFunc {
 	})
 }
 
-func getUserByEmailNameHandler(deps Dependencies) http.HandlerFunc {
+func getUserByEmailHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
 		// vars:=mux.Vars(req)
 		emailID := req.URL.Query().Get("email_pre")
-		namePrefix := req.URL.Query().Get("prefix")
-		if emailID == "" || namePrefix == "" {
+		//namePrefix := req.URL.Query().Get("prefix")
+		if emailID == "" {
 			http.Error(w, fmt.Sprintf("\"%v\"", `query parameters required`), http.StatusUnauthorized)
 			return
 		}
@@ -298,7 +304,7 @@ func getUserByEmailNameHandler(deps Dependencies) http.HandlerFunc {
 			return
 		}
 
-		users, err := deps.bookService.GetUsersByEmailName(req.Context(), emailID, namePrefix)
+		users, err := deps.bookService.GetUsersByEmailName(req.Context(), emailID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -309,7 +315,7 @@ func getUserByEmailNameHandler(deps Dependencies) http.HandlerFunc {
 			return
 
 		}
-		//w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json")
 
 		w.Write(userJSON)
 
@@ -341,6 +347,7 @@ func getBooksActivityHandler(deps Dependencies) http.HandlerFunc {
 			return
 
 		}
+		w.Header().Add("Content-type", "application/json")
 		w.Write(json_response)
 
 	})
@@ -374,6 +381,7 @@ func getBookshandler(deps Dependencies) http.HandlerFunc {
 			return
 
 		}
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(json_response)
 
 	})
@@ -406,7 +414,7 @@ func ReturnBookHandler(deps Dependencies) http.HandlerFunc {
 
 		err = deps.bookService.ReturnBook(req.Context(), UserID, book)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		//fmt.Println(status)

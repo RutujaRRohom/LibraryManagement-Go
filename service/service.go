@@ -25,7 +25,7 @@ type Services interface {
 	IssueBook(ctx context.Context, UserID int, issueReq domain.IssueBookRequest) (booked domain.IssuedBookResponse, err error)
 	ResetPassword(ctx context.Context, email string, pass domain.ResetPasswordRequest) (err error)
 	UpdateName(ctx context.Context, email string, name domain.ResetNameRequest) (err error)
-	GetUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error)
+	GetUsersByEmailName(ctx context.Context, emailID string) (users []domain.GetUsersResponse, err error)
 	GetBooksActivity(ctx context.Context) (book []domain.GetBooksActivityResponse, err error)
 	Getbooks(ctx context.Context, email string) (book []domain.GetBooksResponse, err error)
 	ReturnBook(ctx context.Context, UserID int, book domain.ReturnBookRequest) (err error)
@@ -164,8 +164,8 @@ func (b *bookService) UpdateName(ctx context.Context, email string, name domain.
 	return
 }
 
-func (b *bookService) GetUsersByEmailName(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error) {
-	users, err = b.store.GetUsers(ctx, emailID, prefix)
+func (b *bookService) GetUsersByEmailName(ctx context.Context, emailID string) (users []domain.GetUsersResponse, err error) {
+	users, err = b.store.GetUsers(ctx, emailID)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("error in getting users")
 		return

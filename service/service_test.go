@@ -62,7 +62,7 @@ func (s *ServiceTestSuite) Testbookservice_Register() {
 			},
 		},
 		{
-			name: "when user data is false",
+			name: "when user data is invalid",
 			args: args{
 				ctx: context.TODO(),
 				user: domain.Users{
@@ -417,7 +417,6 @@ func (s *ServiceTestSuite) TestgetUsersByEmailName() {
 			args: args{
 				ctx:   context.TODO(),
 				email: "admin@gmail.com",
-				name:  "Admin",
 			},
 			wantErr: false,
 			prepare: func(a args, s *mocks.Storer) {
@@ -429,7 +428,6 @@ func (s *ServiceTestSuite) TestgetUsersByEmailName() {
 			args: args{
 				ctx:   context.TODO(),
 				email: "admin@gmail.com",
-				name:  "Admin",
 			},
 			wantErr: true,
 			prepare: func(a args, s *mocks.Storer) {
@@ -440,7 +438,7 @@ func (s *ServiceTestSuite) TestgetUsersByEmailName() {
 
 	for _, tt := range tests {
 		tt.prepare(tt.args, s.repo)
-		result, err := s.service.GetUsersByEmailName(tt.args.ctx, tt.args.email, tt.args.name)
+		result, err := s.service.GetUsersByEmailName(tt.args.ctx, tt.args.email)
 		if tt.wantErr {
 			require.Error(t, err)
 		} else {

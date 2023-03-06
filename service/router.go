@@ -28,7 +28,7 @@ func InitRouter(deps Dependencies) (router *mux.Router) {
 	router.HandleFunc("/issue", issueBookHandler(deps)).Methods(http.MethodPost)
 	router.HandleFunc("/updatepassword", ResetPasswordHandler(deps)).Methods(http.MethodPost)
 	router.HandleFunc("/updatename", UpdateNameHandler(deps)).Methods(http.MethodPost)
-	router.HandleFunc("/users/email/name", getUserByEmailNameHandler(deps)).Methods(http.MethodGet)
+	router.HandleFunc("/users/email/name", getUserByEmailHandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/books/activity", getBooksActivityHandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/users/books/activity", getBookshandler(deps)).Methods(http.MethodGet)
 	router.HandleFunc("/users/return", ReturnBookHandler(deps)).Methods(http.MethodPost)
