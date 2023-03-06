@@ -403,7 +403,6 @@ func (s *ServiceTestSuite) TestgetUsersByEmailName() {
 	type args struct {
 		ctx   context.Context
 		email string
-		name  string
 	}
 
 	tests := []struct {

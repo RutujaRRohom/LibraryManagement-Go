@@ -414,10 +414,9 @@ func ReturnBookHandler(deps Dependencies) http.HandlerFunc {
 
 		err = deps.bookService.ReturnBook(req.Context(), UserID, book)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
-		//fmt.Println(status)
 
 		returned := domain.ReturnBookResponse{
 			Message: "book returned successfully",

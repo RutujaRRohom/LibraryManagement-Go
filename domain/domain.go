@@ -1,7 +1,5 @@
 package domain
 
-// "time"
-
 type Users struct {
 	User_id  int    `db:"user_id" json:"user_id"`
 	Email    string `db:"email" json:"email"`
@@ -61,7 +59,6 @@ type GetBookById struct {
 }
 
 type IssueBookRequest struct {
-	//UserID int `json:"user_id"`
 	BookID int `json:"book_id"`
 }
 
