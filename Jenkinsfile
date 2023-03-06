@@ -32,7 +32,7 @@ pipeline
         }
         stage('Deployment') 
         {
-            agent {node {label"deployment"}}
+            // agent {node {label"deployment"}}
             steps 
             {
                 sh 'pwd'
