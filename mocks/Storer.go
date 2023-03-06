@@ -13,17 +13,24 @@ type Storer struct {
 }
 
 // AddUserIssuedBook provides a mock function with given fields: ctx, UserID, BookID
-func (_m *Storer) AddUserIssuedBook(ctx context.Context, UserID int, BookID int) error {
+func (_m *Storer) AddUserIssuedBook(ctx context.Context, UserID int, BookID int) (int, error) {
 	ret := _m.Called(ctx, UserID, BookID)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+	var r0 int
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) int); ok {
 		r0 = rf(ctx, UserID, BookID)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(int)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(ctx, UserID, BookID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // AddingBook provides a mock function with given fields: ctx, add
@@ -151,13 +158,13 @@ func (_m *Storer) GetUserBooks(ctx context.Context, email string) ([]domain.GetB
 	return r0, r1
 }
 
-// GetUsers provides a mock function with given fields: ctx, emailID, prefix
-func (_m *Storer) GetUsers(ctx context.Context, emailID string, prefix string) ([]domain.GetUsersResponse, error) {
-	ret := _m.Called(ctx, emailID, prefix)
+// GetUsers provides a mock function with given fields: ctx, emailID
+func (_m *Storer) GetUsers(ctx context.Context, emailID string) ([]domain.GetUsersResponse, error) {
+	ret := _m.Called(ctx, emailID)
 
 	var r0 []domain.GetUsersResponse
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) []domain.GetUsersResponse); ok {
-		r0 = rf(ctx, emailID, prefix)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []domain.GetUsersResponse); ok {
+		r0 = rf(ctx, emailID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.GetUsersResponse)
@@ -165,8 +172,8 @@ func (_m *Storer) GetUsers(ctx context.Context, emailID string, prefix string) (
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, emailID, prefix)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, emailID)
 	} else {
 		r1 = ret.Error(1)
 	}

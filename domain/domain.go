@@ -66,22 +66,23 @@ type IssueBookRequest struct {
 }
 
 type IssuedBookResponse struct {
-	//issue_id int `json:"issue_id"`
+	IssueID    int    `json:"issue_id"`
 	UserID     int    `json:"user_id"`
 	BookID     int    `json:"bookId"`
 	BookName   string `json:"book_name"`
 	BookAuthor string `json:"bookAuthor"`
 	Publisher  string `json:"publisher"`
-	//Quantity int  `json:"quantity"`
-	//Status string `json:"status"`
-	//Book_Issued_at time.Time ` json:"issue_date"`
-
+	IssueDate  string `json:"issue_date"`
 }
 
-// type issuedBookJson struct {
-// 	message string             `json:"message"`
-// 	issued  IssuedBookResponse `json:"issued"`
-// }
+type GetActivity struct {
+	IssueID    int     `json:"issue_id"`
+	IssueDate  string  `json:"issue_date"`
+	IsReturned bool    `json:"isreturned"`
+	UserID     int     `json:"user_id"`
+	BookID     int     `json:"book_id"`
+	ReturnDate *string `json:"return_date,omitempty"`
+}
 
 type ResetPasswordRequest struct {
 	CurrentPassword string `json:"currentPassword"`
@@ -100,15 +101,10 @@ type ResetNameResponse struct {
 }
 
 type GetUsersResponse struct {
-	// UserID string  ` json:"user_id"`
-	// Email string  `json:"email"`
-	// Password string ` json:"Password"`
-	// Name string     `json:"Name"`
-	// Role string    ` json:"role"`
 	Name       string  `json:"name"`
 	BookIssued string  `json:"book_issued"`
 	IssueDate  string  `json:"issue_date"`
-	ReturnDate *string `json:"return_date"`
+	ReturnDate *string `json:"return_date,omitempty"`
 }
 type GetBooksActivityResponse struct {
 	BookID     string  `json:"book_id"`
@@ -116,7 +112,7 @@ type GetBooksActivityResponse struct {
 	BookName   string  `json:"book_name"`
 	UserName   string  `json:"user_name"`
 	IssueDate  string  `json:"issue_date"`
-	ReturnDate *string `json:"return_date"`
+	ReturnDate *string `json:"return_date,omitempty"`
 }
 
 type GetbooksRequest struct {
@@ -127,7 +123,7 @@ type GetBooksResponse struct {
 	BookID     string  `json:"book_id"`
 	BookName   string  `json:"book_name"`
 	IssueDate  string  `json:"issue_date"`
-	ReturnDate *string `json:"return_date"`
+	ReturnDate *string `json:"return_date,omitempty"`
 }
 
 type ReturnBookRequest struct {

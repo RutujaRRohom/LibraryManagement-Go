@@ -18,12 +18,12 @@ type Storer interface {
 	AddingBook(ctx context.Context, add domain.AddBookResponse) (bookId int, err error)
 	GetAllBooksFromDb(ctx context.Context) ([]domain.GetAllBooksResponse, error)
 	GetBookById(ctx context.Context, BookID int) (Book domain.GetBookById, err error)
-	AddUserIssuedBook(ctx context.Context, UserID int, BookID int) (err error)
+	AddUserIssuedBook(ctx context.Context, UserID int, BookID int) (issueID int, err error)
 	UpdateBookStatus(ctx context.Context, book domain.GetBookById) (err error)
 	IssuedBook(ctx context.Context, UserID int, Userbooking domain.IssueBookRequest) (Book domain.IssuedBookResponse, err error)
 	UpdatePassword(ctx context.Context, email string, pass domain.ResetPasswordRequest) (err error)
 	Updatename(ctx context.Context, email string, name domain.ResetNameRequest) (err error)
-	GetUsers(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error)
+	GetUsers(ctx context.Context, emailID string) (users []domain.GetUsersResponse, err error)
 	GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse, err error)
 	GetUserBooks(ctx context.Context, email string) (book []domain.GetBooksResponse, err error)
 	ReturnBooks(ctx context.Context, UserID int, book domain.ReturnBookRequest) (err error)
@@ -128,7 +128,8 @@ func (s *pgStore) IssuedBook(ctx context.Context, UserID int, booking domain.Iss
 	fmt.Println("error at 107")
 	//fmt.Println("rutuja IssuedBook 107", Book)
 	//TODO getUser()
-	err = s.AddUserIssuedBook(ctx, UserID, booking.BookID)
+	var issueId int
+	issueId, err = s.AddUserIssuedBook(ctx, UserID, booking.BookID)
 	if err != nil {
 		// logger.WithField("err",err.Error()).Error("error in adding  book user")
 		err = errors.New("user id or book id does not exist")
@@ -140,17 +141,17 @@ func (s *pgStore) IssuedBook(ctx context.Context, UserID int, booking domain.Iss
 		logger.WithField("err", err.Error()).Error("error in updating book")
 		return
 	}
+	var issueDate string
 
+	err = s.db.QueryRow("select issue_date from book_activity where user_id =$1 and book_id=$2", UserID, booking.BookID).Scan(&issueDate)
 	issued := domain.IssuedBookResponse{
-		//issue_id : issueID ,
+		IssueID:    issueId,
 		UserID:     UserID,
 		BookID:     Book.BookID,
 		BookName:   Book.BookName,
 		BookAuthor: Book.BookAuthor,
 		Publisher:  Book.Publisher,
-		//Quantity :Book.Quantity,
-		//Status :Book.Status,
-
+		IssueDate:  issueDate,
 	}
 	books = issued
 	return
@@ -167,16 +168,23 @@ func (s *pgStore) GetBookById(ctx context.Context, BookID int) (Book domain.GetB
 
 }
 
-func (s *pgStore) AddUserIssuedBook(ctx context.Context, UserID int, BookID int) (err error) {
+func (s *pgStore) AddUserIssuedBook(ctx context.Context, UserID int, BookID int) (issueID int, err error) {
 
 	// Insert the book issuing record into the database
-	_, err = s.db.Exec("INSERT INTO book_activity ( user_id, book_id) VALUES ($1,$2)", UserID, BookID)
+	// _, err = s.db.Exec("INSERT INTO book_activity ( user_id, book_id) VALUES ($1,$2)", UserID, BookID)
+	// if err != nil {
+	// 	logger.WithField("err", err.Error()).Error("error occured while issuing book")
+	// 	return
+	// }
+
+	sqlQuery := `INSERT INTO book_activity ( user_id, book_id) VALUES ($1,$2) returning activity_id`
+	err = s.db.QueryRow(sqlQuery, UserID, BookID).Scan(&issueID)
 	if err != nil {
-		logger.WithField("err", err.Error()).Error("error occured while issuing book")
+		logger.WithField("err", err.Error()).Error("error registering user")
 		return
 	}
 
-	return
+	return issueID, nil
 }
 
 func (s *pgStore) UpdateBookStatus(ctx context.Context, book domain.GetBookById) (err error) {
@@ -237,10 +245,10 @@ func (s *pgStore) Updatename(ctx context.Context, email string, name domain.Rese
 
 }
 
-func (s *pgStore) GetUsers(ctx context.Context, emailID string, prefix string) (users []domain.GetUsersResponse, err error) {
+func (s *pgStore) GetUsers(ctx context.Context, emailID string) (users []domain.GetUsersResponse, err error) {
 	// getUsersQuery:=`select * from users where email LIKE $1 and name LIKE $2`
 	// rows,err:=s.db.Query(getUsersQuery,emailID,prefix)
-	rows, err := s.db.Query("select  users.name,books.book_name , book_activity.issue_date,book_activity.return_date from users INNER JOIN  book_activity on users.user_id = book_activity.user_id INNER JOIN books on books.book_id = book_activity.book_id WHERE email LIKE $1 || '%' OR name LIKE $2 || '%' ", emailID, prefix)
+	rows, err := s.db.Query("select  users.name,books.book_name , book_activity.issue_date,book_activity.return_date from users INNER JOIN  book_activity on users.user_id = book_activity.user_id INNER JOIN books on books.book_id = book_activity.book_id WHERE email LIKE $1 || '%'  ", emailID)
 
 	fmt.Println(err)
 	if err != nil {
@@ -347,28 +355,28 @@ func (s *pgStore) ReturnBooks(ctx context.Context, UserID int, book domain.Retur
 		return
 	}
 	//check if book has already returned
-	var isReturned bool
+	var issuedBook domain.GetActivity
 
-	err = s.db.QueryRow("select isreturned from book_activity where user_id =$1 and book_id=$2", UserID, book.BookID).Scan(&isReturned)
+	err = s.db.QueryRow("select * from book_activity where user_id =$1 and book_id=$2 and isreturned=$3", UserID, book.BookID, false).Scan(&issuedBook.IssueID, &issuedBook.IssueDate, &issuedBook.IsReturned, &issuedBook.UserID, &issuedBook.BookID, &issuedBook.ReturnDate)
 	if err != nil {
+		err = errors.New("book already returned")
 		logger.WithField("err", err.Error()).Error("book with this ID not exist")
 		return
 	}
-	if isReturned {
-		err = errors.New("book already returned")
-		return
-	}
+	// if issuedBook.IsReturned {
+	// 	err = errors.New("book already returned")
+	// 	return
+	// }
 
-	_, err = s.db.Exec("UPDATE book_activity SET return_date=$1 WHERE user_id=$2 and book_id=$3", time.Now(), UserID, book.BookID)
+	_, err = s.db.Exec("UPDATE book_activity SET return_date=$1 WHERE user_id=$2 and book_id=$3 and activity_id=$4", time.Now(), UserID, book.BookID, issuedBook.IssueID)
 	//fmt.Println("hello there")
 	if err != nil {
 		logger.WithField("err", err.Error()).Error("error in updating")
 		return
 	}
 
-	//var isReturned bool
-	isReturned = true
-	_, err = s.db.Exec("UPDATE book_activity SET isreturned=$1 WHERE user_id=$2 and book_id=$3", isReturned, UserID, book.BookID)
+	var isReturned bool = true
+	_, err = s.db.Exec("UPDATE book_activity SET isreturned=$1 WHERE user_id=$2 and book_id=$3 and activity_id=$4", isReturned, UserID, book.BookID, issuedBook.IssueID)
 	fmt.Println("hello there")
 	if err != nil {
 		logger.WithField("err", err.Error()).Error("error in updating")
@@ -397,5 +405,3 @@ func (s *pgStore) ReturnBooks(ctx context.Context, UserID int, book domain.Retur
 
 	return
 }
-
-//rows, err := s.db.Query("SELECT * FROM users WHERE email LIKE $1 || '%' OR name LIKE $2 || '%' ", emailID, prefix)
