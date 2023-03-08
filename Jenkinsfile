@@ -30,59 +30,59 @@ pipeline
                 }
             }
         }
-//         stage('Scan'){
-//             steps {
-//                 withSonarQubeEnv(installationName: 'sq1') {
-//                     sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0:sonar'
+        stage('Scan'){
+            steps {
+                withSonarQubeEnv(installationName: 'sq1') {
+                    sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0:sonar'
+                }
+            }
+        }
+//         stage('Deployment') 
+//         {
+//             agent {node {label"deployment"}}
+//             steps 
+//             {
+//                 sh 'pwd'
+                
+//                 // Remove previous deployment if any
+//                 sh """
+//                     if pidof server ; then
+//                         killall server ;
+//                     fi
+//                 """
+                
+//                 unstash name:'server' 
+//                 unstash name:'migrations'
+                
+//                 //sh 'ls'
+                
+//                 sh './server migrate'
+                
+//                 // Create logs directory
+//                 sh "mkdir -p logs"
+                
+//                 // Deploy server
+//                 withEnv(['BUILD_ID=dontKillMe', 'JENKINS_NODE_COOKIE=dontKillMe']) 
+//                 {
+//                     sh """
+//                         ./server start > logs/stdout.log 2> logs/error.log &
+//                     """
 //                 }
 //             }
 //         }
-        stage('Deployment') 
-        {
-            agent {node {label"deployment"}}
-            steps 
-            {
-                sh 'pwd'
-                
-                // Remove previous deployment if any
-                sh """
-                    if pidof server ; then
-                        killall server ;
-                    fi
-                """
-                
-                unstash name:'server' 
-                unstash name:'migrations'
-                
-                //sh 'ls'
-                
-                sh './server migrate'
-                
-                // Create logs directory
-                sh "mkdir -p logs"
-                
-                // Deploy server
-                withEnv(['BUILD_ID=dontKillMe', 'JENKINS_NODE_COOKIE=dontKillMe']) 
-                {
-                    sh """
-                        ./server start > logs/stdout.log 2> logs/error.log &
-                    """
-                }
-            }
-        }
-        stage('Backup binary')
-        {
-            steps 
-            {
-                sh 'ls'    
-                withAWS(region:"ap-southeast-1", credentials:"AWS_Credential_Id")
-                {
-                    s3Upload(file:'server', bucket:'binary-files-bucket', path:'LibraryManagement/')
-                }
+//         stage('Backup binary')
+//         {
+//             steps 
+//             {
+//                 sh 'ls'    
+//                 withAWS(region:"ap-southeast-1", credentials:"AWS_Credential_Id")
+//                 {
+//                     s3Upload(file:'server', bucket:'binary-files-bucket', path:'LibraryManagement/')
+//                 }
                 
                 
-            }
-        }
+//             }
+//         }
     }
     
     post {
