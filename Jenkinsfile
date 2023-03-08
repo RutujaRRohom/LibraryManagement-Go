@@ -30,16 +30,16 @@ pipeline
                 }
             }
         }
-        stage('Scan'){
-            steps {
-                withSonarQubeEnv(installationName: 'sq1') {
-                    sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0:sonar'
-                }
-            }
-        }
+//         stage('Scan'){
+//             steps {
+//                 withSonarQubeEnv(installationName: 'sq1') {
+//                     sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0:sonar'
+//                 }
+//             }
+//         }
         stage('Deployment') 
         {
-            // agent {node {label"deployment"}}
+            agent {node {label"deployment"}}
             steps 
             {
                 sh 'pwd'
