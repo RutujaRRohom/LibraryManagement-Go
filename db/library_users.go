@@ -25,7 +25,7 @@ type Storer interface {
 	Updatename(ctx context.Context, email string, name domain.ResetNameRequest) (err error)
 	GetUsers(ctx context.Context, emailID string) (users []domain.GetUsersResponse, err error)
 	GetBookActivity(ctx context.Context) (book []domain.GetBooksActivityResponse, err error)
-	GetUserBooks(ctx context.Context, email string) (book []domain.GetBooksResponse, err error)
+	GetUserBooks(ctx context.Context, UserID int) (book []domain.GetBooksResponse, err error)
 	ReturnBooks(ctx context.Context, UserID int, book domain.ReturnBookRequest) (err error)
 }
 
@@ -211,7 +211,6 @@ func (s *pgStore) UpdateBookStatus(ctx context.Context, book domain.GetBookById)
 func (s *pgStore) UpdatePassword(ctx context.Context, email string, pass domain.ResetPasswordRequest) (err error) {
 
 	//check if the user exists with this email address in database
-	//resetPasswordQuery:= `select email from users where password=$1`
 
 	err = s.db.QueryRow("select email from users where password= $1", pass.CurrentPassword).Scan(&email)
 	fmt.Println(pass.CurrentPassword)
@@ -287,9 +286,9 @@ func (s *pgStore) GetBookActivity(ctx context.Context) (book []domain.GetBooksAc
 
 }
 
-func (s *pgStore) GetUserBooks(ctx context.Context, email string) (book []domain.GetBooksResponse, err error) {
+func (s *pgStore) GetUserBooks(ctx context.Context, UserID int) (book []domain.GetBooksResponse, err error) {
 
-	rows, err := s.db.Query("select  users.name,books.book_id ,books.book_name , book_activity.issue_date,book_activity.return_date from users INNER JOIN  book_activity on users.user_id = book_activity.user_id INNER JOIN books on books.book_id = book_activity.book_id WHERE users.email=$1", email)
+	rows, err := s.db.Query("select  users.name,books.book_id ,books.book_name , book_activity.issue_date,book_activity.return_date from users INNER JOIN  book_activity on users.user_id = book_activity.user_id INNER JOIN books on books.book_id = book_activity.book_id WHERE users.user_id=$1", UserID)
 	if err != nil {
 		logger.WithField("err", err.Error()).Error("error in getting users")
 		return

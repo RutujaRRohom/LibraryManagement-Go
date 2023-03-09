@@ -103,20 +103,6 @@ func addBooksHandler(deps Dependencies) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("\"%v\"", `Invalid request body`), http.StatusBadRequest)
 			return
 		}
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-
-		// Extract the token from the Authorization header
-		//tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
-
-		err = ValidateJWT(authHeader)
-		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
 
 		//adding books
 		addbook, err := deps.bookService.AddBooks(req.Context(), add)
@@ -158,6 +144,7 @@ func getAllBooksHandler(deps Dependencies) http.HandlerFunc {
 
 func issueBookHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+
 		var issueReq domain.IssueBookRequest
 		err := json.NewDecoder(req.Body).Decode(&issueReq)
 		if err != nil {
@@ -169,17 +156,8 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("\"%v\"", `Invalid request body`), http.StatusBadRequest)
 			return
 		}
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-
-		UserID, err := ValidateJWTId(authHeader)
-		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
+		id := req.Context().Value("token")
+		UserID := id.(int)
 
 		booked, err := deps.bookService.IssueBook(req.Context(), UserID, issueReq)
 		if err != nil {
@@ -206,16 +184,9 @@ func ResetPasswordHandler(deps Dependencies) http.HandlerFunc {
 			return
 		}
 
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-		email, err := ValidateJWTEmail(authHeader)
-		if err != nil {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
+		Email := req.Context().Value("token")
+		email := Email.(string)
+
 		if err = validateEmail(email); err != nil {
 			http.Error(w, "invalid mail", http.StatusBadRequest)
 			return
@@ -223,7 +194,7 @@ func ResetPasswordHandler(deps Dependencies) http.HandlerFunc {
 
 		err = deps.bookService.ResetPassword(req.Context(), email, pass)
 		if err != nil {
-			http.Error(w, "incorrect current password", http.StatusInternalServerError)
+			http.Error(w, "incorrect current password", http.StatusBadRequest)
 			return
 		}
 		msg := domain.ResetPasswordResponse{
@@ -249,16 +220,9 @@ func UpdateNameHandler(deps Dependencies) http.HandlerFunc {
 			return
 		}
 
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-		email, err := ValidateJWTEmail(authHeader)
-		if err != nil {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
+		Email := req.Context().Value("token")
+		email := Email.(string)
+
 		if err = validateEmail(email); err != nil {
 			http.Error(w, "invalid mail", http.StatusBadRequest)
 			return
@@ -285,22 +249,9 @@ func UpdateNameHandler(deps Dependencies) http.HandlerFunc {
 func getUserByEmailHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
-		// vars:=mux.Vars(req)
 		emailID := req.URL.Query().Get("email_pre")
-		//namePrefix := req.URL.Query().Get("prefix")
 		if emailID == "" {
 			http.Error(w, fmt.Sprintf("\"%v\"", `query parameters required`), http.StatusUnauthorized)
-			return
-		}
-
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-		err := ValidateJWT(authHeader)
-		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
 
@@ -325,17 +276,6 @@ func getUserByEmailHandler(deps Dependencies) http.HandlerFunc {
 func getBooksActivityHandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, fmt.Sprintf("\"%v\"", `Authorization header is required`), http.StatusUnauthorized)
-			return
-		}
-		err := ValidateJWT(authHeader)
-		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
-
 		book, err := deps.bookService.GetBooksActivity(req.Context())
 		if err != nil {
 			http.Error(w, "error returning books", http.StatusBadRequest)
@@ -356,21 +296,9 @@ func getBooksActivityHandler(deps Dependencies) http.HandlerFunc {
 func getBookshandler(deps Dependencies) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-		email, err := ValidateJWTEmail(authHeader)
-		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
-		if err = validateEmail(email); err != nil {
-			http.Error(w, "invalid mail", http.StatusBadRequest)
-			return
-		}
-		book, err := deps.bookService.Getbooks(req.Context(), email)
+		id := req.Context().Value("token")
+		UserID := id.(int)
+		book, err := deps.bookService.Getbooks(req.Context(), UserID)
 		if err != nil {
 			http.Error(w, "error returning books", http.StatusBadRequest)
 			return
@@ -399,18 +327,8 @@ func ReturnBookHandler(deps Dependencies) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("\"%v\"", `invalid request body`), http.StatusBadRequest)
 			return
 		}
-
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
-			return
-		}
-
-		UserID, err := ValidateJWTId(authHeader)
-		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
+		id := req.Context().Value("token")
+		UserID := id.(int)
 
 		err = deps.bookService.ReturnBook(req.Context(), UserID, book)
 		if err != nil {

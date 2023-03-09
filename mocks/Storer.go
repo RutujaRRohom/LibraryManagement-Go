@@ -135,13 +135,13 @@ func (_m *Storer) GetBookById(ctx context.Context, BookID int) (domain.GetBookBy
 	return r0, r1
 }
 
-// GetUserBooks provides a mock function with given fields: ctx, email
-func (_m *Storer) GetUserBooks(ctx context.Context, email string) ([]domain.GetBooksResponse, error) {
-	ret := _m.Called(ctx, email)
+// GetUserBooks provides a mock function with given fields: ctx, UserID
+func (_m *Storer) GetUserBooks(ctx context.Context, UserID int) ([]domain.GetBooksResponse, error) {
+	ret := _m.Called(ctx, UserID)
 
 	var r0 []domain.GetBooksResponse
-	if rf, ok := ret.Get(0).(func(context.Context, string) []domain.GetBooksResponse); ok {
-		r0 = rf(ctx, email)
+	if rf, ok := ret.Get(0).(func(context.Context, int) []domain.GetBooksResponse); ok {
+		r0 = rf(ctx, UserID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.GetBooksResponse)
@@ -149,8 +149,8 @@ func (_m *Storer) GetUserBooks(ctx context.Context, email string) ([]domain.GetB
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, email)
+	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = rf(ctx, UserID)
 	} else {
 		r1 = ret.Error(1)
 	}

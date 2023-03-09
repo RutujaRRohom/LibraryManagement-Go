@@ -14,8 +14,8 @@ var (
 )
 
 func Load() {
-	viper.SetDefault("APP_NAME", "app")
-	viper.SetDefault("APP_PORT", "8002")
+	viper.SetDefault("APP_NAME", "library_management")
+	viper.SetDefault("APP_PORT", "33001")
 
 	viper.SetConfigName("application")
 	viper.SetConfigType("yaml")

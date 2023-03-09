@@ -501,8 +501,8 @@ func (s *ServiceTestSuite) TestGetbooksusers() {
 	t := s.T()
 
 	type args struct {
-		ctx   context.Context
-		email string
+		ctx    context.Context
+		UserID int
 	}
 
 	tests := []struct {
@@ -515,8 +515,8 @@ func (s *ServiceTestSuite) TestGetbooksusers() {
 
 			name: "if valid mail",
 			args: args{
-				ctx:   context.TODO(),
-				email: "rutujarohom@gmail.com",
+				ctx:    context.TODO(),
+				UserID: 4,
 			},
 			wantErr: false,
 			prepare: func(a args, s *mocks.Storer) {
@@ -524,10 +524,10 @@ func (s *ServiceTestSuite) TestGetbooksusers() {
 			},
 		},
 		{
-			name: "if valid mail",
+			name: "if valid UserID",
 			args: args{
-				ctx:   context.TODO(),
-				email: "rutujarohom@gmail.com", //invalid
+				ctx:    context.TODO(),
+				UserID: 30,
 			},
 			wantErr: true,
 			prepare: func(a args, s *mocks.Storer) {
@@ -539,7 +539,7 @@ func (s *ServiceTestSuite) TestGetbooksusers() {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.prepare(tt.args, s.repo)
-			result, err := s.service.Getbooks(tt.args.ctx, tt.args.email)
+			result, err := s.service.Getbooks(tt.args.ctx, tt.args.UserID)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

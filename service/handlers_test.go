@@ -328,24 +328,24 @@ func (s *HandlerTestSuite) Test_UpdateNameHandler() {
 // 	})
 // }
 
-func (s *HandlerTestSuite) Test_getBooksActivityHandler() {
-	t := s.T()
-	t.Run("when a invalid get  request is made ", func(t *testing.T) {
-		r := httptest.NewRequest(http.MethodGet, "/books/activity", nil)
-		w := httptest.NewRecorder()
-		respBody := "Authorization header is required"
-		deps := Dependencies{
-			bookService: s.service,
-		}
+// func (s *HandlerTestSuite) Test_getBooksActivityHandler() {
+// 	t := s.T()
+// 	t.Run("when a invalid get  request is made ", func(t *testing.T) {
+// 		r := httptest.NewRequest(http.MethodGet, "/books/activity", nil)
+// 		w := httptest.NewRecorder()
+// 		respBody := "Authorization header is required"
+// 		deps := Dependencies{
+// 			bookService: s.service,
+// 		}
 
-		exp, _ := json.Marshal(respBody)
-		got := getBooksActivityHandler(deps)
-		got.ServeHTTP(w, r)
-		assert.Equal(t, http.StatusBadRequest, http.StatusBadRequest)
-		assert.Equal(t, string(exp), strings.TrimSpace(w.Body.String()))
+// 		exp, _ := json.Marshal(respBody)
+// 		got := getBooksActivityHandler(deps)
+// 		got.ServeHTTP(w, r)
+// 		assert.Equal(t, http.StatusBadRequest, http.StatusBadRequest)
+// 		assert.Equal(t, string(exp), strings.TrimSpace(w.Body.String()))
 
-	})
-}
+// 	})
+// }
 
 func (s *HandlerTestSuite) Test_ReturnBookHandler() {
 	t := s.T()
