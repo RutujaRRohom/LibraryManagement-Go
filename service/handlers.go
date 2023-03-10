@@ -152,12 +152,15 @@ func issueBookHandler(deps Dependencies) http.HandlerFunc {
 			return
 
 		}
+		id := req.Context().Value("token")
+		UserID := id.(int)
+
 		if issueReq.BookID == 0 {
 			http.Error(w, fmt.Sprintf("\"%v\"", `Invalid request body`), http.StatusBadRequest)
 			return
 		}
-		id := req.Context().Value("token")
-		UserID := id.(int)
+		// id := req.Context().Value("token")
+		// UserID := id.(int)
 
 		booked, err := deps.bookService.IssueBook(req.Context(), UserID, issueReq)
 		if err != nil {

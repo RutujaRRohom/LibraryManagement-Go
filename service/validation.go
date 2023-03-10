@@ -12,10 +12,6 @@ import (
 	logger "github.com/sirupsen/logrus"
 )
 
-type key string
-
-const tokenkey key = "token"
-
 func validateEmail(email string) (err error) {
 	em := regexp.MustCompile(`^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$`)
 	if !em.MatchString(email) {
@@ -121,7 +117,7 @@ func ValidateUser(valid http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(req.Context(), tokenkey, UserID)
+		ctx := context.WithValue(req.Context(), "token", UserID)
 		valid.ServeHTTP(w, req.WithContext(ctx))
 
 	})
@@ -140,7 +136,7 @@ func ValidateEmail(valid http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(req.Context(), tokenkey, Email)
+		ctx := context.WithValue(req.Context(), "token", Email)
 		valid.ServeHTTP(w, req.WithContext(ctx))
 
 	})
@@ -159,7 +155,7 @@ func ValidateAdmin(valid http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(req.Context(), tokenkey, Role)
+		ctx := context.WithValue(req.Context(), "token", Role)
 		valid.ServeHTTP(w, req.WithContext(ctx))
 
 	})
